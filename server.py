@@ -1,0 +1,201 @@
+"""
+=========================================================
+NATIVE PYTHON OPENCV OMR & ASKA EXCEL API SERVER
+=========================================================
+"""
+
+import http.server
+import socketserver
+import json
+import base64
+import os
+import re
+import numpy as np
+import cv2
+
+PORT = 8000
+DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+
+def process_native_omr(image_base64, keys, total_questions=25):
+    try:
+        # Strip header
+        if "," in image_base64:
+            image_base64 = image_base64.split(",")[1]
+
+        image_data = base64.b64decode(image_base64)
+        nparr = np.frombuffer(image_data, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        if img is None:
+            return None
+
+        # Preprocessing
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(gray, (11, 11), 0)
+        binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 51, 15)
+
+        # Stage 1: Table Localization
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 10))
+        dilated = cv2.dilate(binary, kernel, iterations=4)
+        contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        if not contours:
+            return None
+
+        main_contour = max(contours, key=cv2.contourArea)
+        x, y, w, h = cv2.boundingRect(main_contour)
+        padding = int(h * 0.05)
+        x = max(0, x - padding)
+        y = max(0, y - padding)
+        w = min(img.shape[1] - x, w + 2 * padding)
+        h = min(img.shape[0] - y, h + 2 * padding)
+
+        cropped = img[y:y+h, x:x+w]
+
+        # Stage 2: Question Column Blocks Detection
+        crop_gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
+        crop_blurred = cv2.GaussianBlur(crop_gray, (7, 7), 0)
+        crop_binary = cv2.adaptiveThreshold(crop_blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+
+        crop_contours, _ = cv2.findContours(crop_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        candidate_blocks = []
+        for c in crop_contours:
+            area = cv2.contourArea(c)
+            bx, by, bw, bh = cv2.boundingRect(c)
+            ratio = bw / float(bh)
+            if area > 2000 and 0.4 < ratio < 3.0:
+                candidate_blocks.append((bx, by, bw, bh))
+
+        candidate_blocks.sort(key=lambda r: r[1])
+        y_tolerance = int(candidate_blocks[0][3] * 0.5) if candidate_blocks else 50
+        y_groups = {}
+
+        for b in candidate_blocks:
+            added = False
+            for k in y_groups:
+                if abs(k - b[1]) < y_tolerance:
+                    y_groups[k].append(b)
+                    added = True
+                    break
+            if not added:
+                y_groups[b[1]] = [b]
+
+        question_blocks = max(y_groups.values(), key=len) if y_groups else []
+        question_blocks.sort(key=lambda r: r[0])
+
+        if len(question_blocks) < 5:
+            # Fallback 5 synthetic columns
+            col_w = cropped.shape[1] // 5
+            question_blocks = [(c * col_w, 0, col_w, cropped.shape[0]) for c in range(5)]
+
+        # Stage 3: Bubble Densitometry Evaluation
+        OPTIONS = ["A", "B", "C", "D"]
+        NUM_OPTIONS = 4
+        NUM_QUESTIONS_PER_COLUMN = 5
+
+        detected_answers = []
+        correct_count = 0
+        wrong_count = 0
+        num_q = int(total_questions) if total_questions else len(keys)
+
+        for i, block in enumerate(question_blocks[:5]):
+            bx, by, bw, bh = block
+            num_col_w = int(bw * 0.15)
+            cell_w = (bw - num_col_w) // NUM_OPTIONS
+            cell_h = bh // NUM_QUESTIONS_PER_COLUMN
+
+            for j in range(NUM_QUESTIONS_PER_COLUMN):
+                q_num = i * NUM_QUESTIONS_PER_COLUMN + j + 1
+                if q_num > num_q:
+                    continue
+
+                scores = []
+                for k in range(NUM_OPTIONS):
+                    cell_x = bx + num_col_w + (k * cell_w)
+                    cell_y = by + (j * cell_h)
+                    pad_x = int(cell_w * 0.15)
+                    pad_y = int(cell_h * 0.15)
+
+                    roi = crop_binary[cell_y+pad_y : cell_y+cell_h-pad_y, cell_x+pad_x : cell_x+cell_w-pad_x]
+                    score = int(cv2.countNonZero(roi)) if roi.size > 0 else 0
+                    scores.append(score)
+
+                max_score = max(scores)
+                max_idx = scores.index(max_score)
+                ans = OPTIONS[max_idx] if max_score > 18 else "A"
+
+                key_ans = keys[q_num - 1] if q_num - 1 < len(keys) else "A"
+                is_correct = (ans.upper() == key_ans.upper())
+
+                if is_correct:
+                    correct_count += 1
+                else:
+                    wrong_count += 1
+
+                detected_answers.append({
+                    "questionNumber": q_num,
+                    "studentAnswer": ans,
+                    "correctAnswer": key_ans,
+                    "isCorrect": is_correct,
+                    "scores": scores
+                })
+
+        score_pct = int(round((correct_count / float(num_q)) * 100))
+
+        return {
+            "detectedAnswers": detected_answers,
+            "totalQuestions": num_q,
+            "correctCount": correct_count,
+            "wrongCount": wrong_count,
+            "score": score_pct
+        }
+    except Exception as e:
+        print(f"[ERROR] Native OMR Exception: {e}")
+        return None
+
+class AppHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=DIRECTORY, **kwargs)
+
+    def do_POST(self):
+        if self.path == '/api/scan_omr':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            req_json = json.loads(post_data.decode('utf-8'))
+
+            image_b64 = req_json.get('image', '')
+            keys = req_json.get('keys', ['A'] * 25)
+            total_q = req_json.get('totalQuestions', len(keys))
+
+            result = process_native_omr(image_b64, keys, total_q)
+            if result:
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(result).encode('utf-8'))
+            else:
+                self.send_response(500)
+                self.end_headers()
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+
+if __name__ == '__main__':
+    socketserver.TCPServer.allow_reuse_address = True
+    try:
+        with socketserver.TCPServer(("", PORT), AppHandler) as httpd:
+            print(f"[SERVER] Python Native OpenCV Server running at http://localhost:{PORT}")
+            httpd.serve_forever()
+    except OSError as err:
+        if "10048" in str(err) or "Address already in use" in str(err):
+            print(f"[SERVER] Port {PORT} sudah aktif dan siap melayani permintaan.")
+        else:
+            print(f"[SERVER] Socket error: {err}")

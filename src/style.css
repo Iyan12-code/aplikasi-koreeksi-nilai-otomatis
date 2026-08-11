@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-glow: rgba(99, 102, 241, 0.35);
+    --secondary: #8b5cf6;
+    --emerald: #10b981;
+    --rose: #ef4444;
+    --amber: #f59e0b;
+    --bg-main: #0b0f19;
+    --bg-card: rgba(18, 26, 44, 0.75);
+    --bg-card-border: rgba(255, 255, 255, 0.08);
+  }
+
+  body {
+    background-color: #0b0f19;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
+    background-attachment: fixed;
+    color: #f8fafc;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}
+
+/* Glassmorphism Card Utility */
+.glass-card {
+  background: rgba(18, 26, 44, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.5);
+}
+
+/* Chip Buttons */
+.btn-chip {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.btn-chip:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-q-chip {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(11, 15, 25, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.35);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6366f1;
+}
+
+/* Animations */
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.3); }
+}
+
+.animate-pulse-dot {
+  animation: pulseDot 1.6s infinite;
+}
+
+@keyframes modalPopIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-modal-pop {
+  animation: modalPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Markdown AI Report Typography */
+.markdown-content {
+  color: #cbd5e1;
+  line-height: 1.8;
+  font-size: 0.95rem;
+}
+
+.markdown-content h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.markdown-content h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #818cf8;
+  margin-top: 1.2rem;
+  margin-bottom: 0.6rem;
+}
+
+.markdown-content h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content p {
+  margin-bottom: 0.8rem;
+}
+
+.markdown-content ul, .markdown-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.markdown-content li {
+  margin-bottom: 0.35rem;
+}
+
+.markdown-content blockquote {
+  border-left: 4px solid #6366f1;
+  background: rgba(99, 102, 241, 0.08);
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  font-style: italic;
+}
+
+.markdown-content strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.markdown-content code {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.3rem;
+  font-size: 0.85em;
+  color: #38bdf8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
