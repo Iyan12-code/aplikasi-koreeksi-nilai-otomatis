@@ -485,12 +485,19 @@ function renderApp() {
 
   const state = store.getState();
 
-  // If user is not logged in, render the Auth View
+  // 1. If user is not logged in, render the Auth View (Login & Register)
   if (!state.isAuthenticated) {
     app.innerHTML = renderAuthView();
     return;
   }
 
+  // 2. If in onboarding splash mode, render the standalone FULL-PAGE Splash Screen
+  if (state.showOnboardingSplash) {
+    app.innerHTML = renderOnboardingSplash();
+    return;
+  }
+
+  // 3. Otherwise, render the Main Dashboard View
   const isDetailView = state.activeTab === 'tab-detail';
 
   app.innerHTML = `
@@ -508,7 +515,6 @@ function renderApp() {
       </main>
     </div>
     ${renderProfileModal()}
-    ${renderOnboardingSplash()}
   `;
 
   bindEvents();

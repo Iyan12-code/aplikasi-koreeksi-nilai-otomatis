@@ -1,7 +1,7 @@
 /**
  * =========================================================
- * ONBOARDING SPLASH SCREEN COMPONENT
- * SmartEval Quick Start Guide (Shown After Login/Register)
+ * FULL-PAGE ONBOARDING SPLASH SCREEN
+ * SmartEval Dedicated Standalone Welcome & 5-Step Guide Page
  * =========================================================
  */
 
@@ -9,108 +9,133 @@ import { store } from '../state/store.js';
 
 export function renderOnboardingSplash() {
   const state = store.getState();
-  if (!state.showOnboardingSplash) return '';
-
   const user = state.currentUser || {
-    fullName: 'Pendidik',
-    institution: 'Instansi Pendidikan'
+    fullName: 'Budi Santoso, M.Pd',
+    institution: 'SMA Negeri 1 Jakarta'
   };
 
   const steps = [
     {
-      num: '1',
+      num: '01',
       icon: 'fa-user-graduate',
       gradient: 'from-blue-500 to-indigo-600',
-      shadow: 'shadow-indigo-500/20',
-      title: '1. Input Data Siswa',
+      shadow: 'shadow-blue-500/25',
+      badge: 'Langkah 1',
+      title: 'Input Data Siswa',
       desc: 'Atur mata pelajaran, standar KKM, jumlah butir soal, dan unggah daftar nama siswa via Excel.',
     },
     {
-      num: '2',
+      num: '02',
       icon: 'fa-key',
       gradient: 'from-indigo-500 to-purple-600',
-      shadow: 'shadow-purple-500/20',
-      title: '2. Kunci & Kisi-kisi',
-      desc: 'Tentukan opsi kunci jawaban (A–D) dan indikator materi kompetensi per nomor soal.',
+      shadow: 'shadow-indigo-500/25',
+      badge: 'Langkah 2',
+      title: 'Kunci & Kisi-kisi',
+      desc: 'Tentukan opsi kunci jawaban (A–D) dan indikator materi kompetensi per nomor butir soal.',
     },
     {
-      num: '3',
+      num: '03',
       icon: 'fa-camera',
       gradient: 'from-purple-500 to-pink-600',
-      shadow: 'shadow-pink-500/20',
-      title: '3. Koreksi OMR AI',
+      shadow: 'shadow-purple-500/25',
+      badge: 'Langkah 3',
+      title: 'Koreksi OMR AI',
       desc: 'Unggah lembar LJK siswa dan klik tombol "Jalankan Koreksi Otomatis" untuk sensor instan.',
     },
     {
-      num: '4',
+      num: '04',
       icon: 'fa-robot',
       gradient: 'from-amber-500 to-orange-600',
-      shadow: 'shadow-orange-500/20',
-      title: '4. Analisis Diagnostik',
-      desc: 'Dapatkan laporan evaluasi kelemahan siswa & saran pembelajaran remedial dari AI LLaMA 3.3.',
+      shadow: 'shadow-amber-500/25',
+      badge: 'Langkah 4',
+      title: 'Analisis Diagnostik',
+      desc: 'Dapatkan evaluasi kelemahan siswa & saran pembelajaran remedial dari AI LLaMA 3.3.',
     },
     {
-      num: '5',
+      num: '05',
       icon: 'fa-file-excel',
       gradient: 'from-emerald-500 to-teal-600',
-      shadow: 'shadow-emerald-500/20',
-      title: '5. Riwayat & Ekspor',
+      shadow: 'shadow-emerald-500/25',
+      badge: 'Langkah 5',
+      title: 'Riwayat & Ekspor',
       desc: 'Rekapitulasi nilai seluruh kelas dan unduh laporan resmi berformat Microsoft Excel ASKA.',
     },
   ];
 
   return `
-    <div class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6 overflow-y-auto cursor-pointer animate-fade-in" id="onboardingSplashOverlay" onclick="window.app.dismissOnboardingSplash()">
+    <div class="min-h-screen w-full bg-slate-950 flex flex-col justify-between p-4 sm:p-8 lg:p-12 relative overflow-x-hidden cursor-pointer select-none animate-fade-in" id="fullSplashPage" onclick="window.app.dismissOnboardingSplash()">
       
-      <!-- Background Decorative Lights -->
-      <div class="absolute -top-32 -left-32 w-80 h-80 bg-indigo-600/30 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-32 -right-32 w-80 h-80 bg-purple-600/30 rounded-full blur-3xl pointer-events-none"></div>
+      <!-- Background Ambient Glow Effects -->
+      <div class="absolute -top-40 -left-40 w-[32rem] h-[32rem] bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute top-1/2 -right-40 w-[30rem] h-[30rem] bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-40 left-1/3 w-[28rem] h-[28rem] bg-pink-600/15 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div class="glass-card max-w-2xl w-full p-6 sm:p-8 border-indigo-500/30 bg-slate-900/90 shadow-2xl relative my-auto cursor-default transform transition-all animate-modal-pop" onclick="event.stopPropagation()">
-        
-        <!-- HEADER -->
-        <div class="text-center pb-5 mb-5 border-b border-white/10">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold mb-3 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
-            <span>✨ PANDUAN PENGGUNAAN APLIKASI</span>
-          </div>
-
-          <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Selamat Datang, <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">${user.fullName}</span>! 👋
-          </h2>
-          <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">
-            Sistem evaluasi pembelajaran terintegrasi: Koreksi OMR presisi tinggi dan diagnostik AI otomatis.
-          </p>
+      <!-- 1. TOP HEADER & GREETING -->
+      <div class="max-w-6xl w-full mx-auto z-10 pt-2 sm:pt-4 text-center">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold mb-4 shadow-sm">
+          <i class="fa-solid fa-graduation-cap text-indigo-400"></i>
+          <span>SMARTEVAL AI &bull; PANDUAN RINGKAS ASESMEN</span>
         </div>
 
-        <!-- 5 STEPS GRID -->
-        <div class="space-y-2.5 mb-6">
-          ${steps.map(s => `
-            <div class="flex items-start gap-3.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-all group">
-              <div class="w-9 h-9 rounded-xl bg-gradient-to-br ${s.gradient} ${s.shadow} text-white flex items-center justify-center text-sm font-black shrink-0 shadow-md group-hover:scale-105 transition-transform">
-                <i class="fa-solid ${s.icon}"></i>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+          Selamat Datang, <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">${user.fullName}</span>! 👋
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2 max-w-xl mx-auto">
+          ${user.institution} &bull; Sistem evaluasi pembelajaran otomatis dengan sensor OMR presisi tinggi dan diagnostik AI terintegrasi.
+        </p>
+      </div>
+
+      <!-- 2. THE 5-STEP WORKFLOW CARDS (GRID 5 COLS / RESPONSIVE) -->
+      <div class="max-w-6xl w-full mx-auto z-10 my-6 sm:my-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          ${steps.map((s, idx) => `
+            <div class="glass-card p-5 border-white/10 bg-slate-900/60 hover:bg-slate-900/90 transition-all duration-300 flex flex-col justify-between rounded-2xl group shadow-lg hover:shadow-indigo-500/10 hover:-translate-y-1">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <div class="w-11 h-11 rounded-2xl bg-gradient-to-br ${s.gradient} ${s.shadow} text-white flex items-center justify-center text-lg font-black shadow-md group-hover:scale-110 transition-transform">
+                    <i class="fa-solid ${s.icon}"></i>
+                  </div>
+                  <span class="text-xs font-mono font-black text-slate-500 tracking-wider">${s.num}</span>
+                </div>
+
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400 block mb-1">${s.badge}</span>
+                <h3 class="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors leading-snug mb-2">${s.title}</h3>
+                <p class="text-[11px] text-slate-400 leading-relaxed">${s.desc}</p>
               </div>
-              <div class="min-w-0">
-                <h4 class="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">${s.title}</h4>
-                <p class="text-[11px] text-slate-400 leading-snug mt-0.5">${s.desc}</p>
+
+              <div class="pt-3 mt-3 border-t border-white/5 flex items-center text-[10px] text-slate-500 group-hover:text-indigo-300 transition-colors">
+                <span>Tahap ${idx + 1} dari 5</span>
+                <i class="fa-solid fa-arrow-right ml-auto text-[8px]"></i>
               </div>
             </div>
           `).join('')}
         </div>
+      </div>
 
-        <!-- ALERT NOTIFIKASI & ACTION BUTTON -->
-        <div class="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <div class="flex items-center gap-2 text-indigo-300 text-xs font-semibold bg-indigo-500/10 border border-indigo-500/20 px-3 py-2 rounded-xl w-full sm:w-auto justify-center sm:justify-start animate-pulse">
-            <i class="fa-solid fa-hand-pointer text-xs"></i>
-            <span>Tekan di mana saja pada layar untuk ke Halaman Utama</span>
+      <!-- 3. BOTTOM INTERACTIVE BAR & CLICK ANYWHERE PROMPT -->
+      <div class="max-w-6xl w-full mx-auto z-10 pb-2 sm:pb-4 text-center">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          
+          <!-- Pulsing Instruction Alert -->
+          <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-200 text-xs sm:text-sm font-bold shadow-lg shadow-indigo-500/15 animate-pulse">
+            <i class="fa-solid fa-hand-pointer text-indigo-400 text-sm"></i>
+            <span>Tekan atau klik di mana saja pada layar untuk langsung masuk ke Halaman Utama</span>
           </div>
 
-          <button type="button" class="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all shrink-0" onclick="window.app.dismissOnboardingSplash()">
-            <span>Mulai Asesmen</span> <i class="fa-solid fa-chevron-right text-[10px]"></i>
+          <!-- Direct Start Button -->
+          <button type="button" class="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-2xl text-xs sm:text-sm font-bold shadow-lg shadow-indigo-500/30 flex items-center gap-2 transition-all shrink-0 hover:scale-105" onclick="event.stopPropagation(); window.app.dismissOnboardingSplash();">
+            <span>Mulai Asesmen</span>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
           </button>
         </div>
 
+        <div class="mt-4">
+          <span class="text-[10px] font-bold tracking-widest text-slate-600 uppercase">
+            🛡 SECURE CLOUD &nbsp;&bull;&nbsp; ✨ AI LLaMA 3.3 ENHANCED &nbsp;&bull;&nbsp; 📱 MULTI-DEVICE READY
+          </span>
+        </div>
       </div>
+
     </div>
   `;
 }
