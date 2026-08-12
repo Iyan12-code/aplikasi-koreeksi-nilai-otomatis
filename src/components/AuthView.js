@@ -25,7 +25,7 @@ export function renderAuthView() {
           </div>
           <h1 class="text-2xl font-black tracking-tight text-white">Koreksi Nilai Otomatis</h1>
           <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-            ${isRegister ? 'Daftar sekarang untuk mulai mengotomatiskan penilaian tugas siswa Anda dengan presisi tinggi.' : 'Masuk ke akun pendidik Anda'}
+            ${isRegister ? 'Daftar sekarang untuk mulai mengotomatiskan penilaian tugas siswa Anda dengan presisi tinggi.' : 'Masuk ke akun pendidik Anda untuk memulai asesmen'}
           </p>
         </div>
 
@@ -53,7 +53,7 @@ function renderLoginForm() {
         <label for="loginEmail" class="block text-xs font-bold text-slate-200 mb-1.5">Alamat Email</label>
         <div class="relative flex items-center">
           <i class="fa-solid fa-envelope absolute left-3.5 text-slate-400 text-sm pointer-events-none"></i>
-          <input type="email" id="loginEmail" value="guru@sekolah.sch.id" required placeholder="nama@sekolah.sch.id" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
+          <input type="email" id="loginEmail" required placeholder="nama@sekolah.sch.id" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
         </div>
       </div>
 
@@ -62,7 +62,7 @@ function renderLoginForm() {
         <label for="loginPassword" class="block text-xs font-bold text-slate-200 mb-1.5">Kata Sandi</label>
         <div class="relative flex items-center">
           <i class="fa-solid fa-lock absolute left-3.5 text-slate-400 text-sm pointer-events-none"></i>
-          <input type="password" id="loginPassword" value="12345678" required placeholder="••••••••" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
+          <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
           <button type="button" class="absolute right-3 text-slate-400 hover:text-white text-xs" onclick="window.app.togglePasswordVisibility('loginPassword')">
             <i class="fa-solid fa-eye" id="icon-loginPassword"></i>
           </button>
@@ -120,7 +120,7 @@ function renderRegisterForm() {
         <label for="regInstitution" class="block text-xs font-bold text-slate-200 mb-1.5">Nama Institusi / Sekolah</label>
         <div class="relative flex items-center">
           <i class="fa-solid fa-school absolute left-3.5 text-slate-400 text-sm pointer-events-none"></i>
-          <input type="text" id="regInstitution" required placeholder="Nama SMA/SMP/Universitas" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
+          <input type="text" id="regInstitution" required placeholder="Contoh: SMA Negeri 1 Jakarta" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
         </div>
       </div>
 

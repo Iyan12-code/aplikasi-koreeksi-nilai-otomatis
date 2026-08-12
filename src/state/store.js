@@ -1,26 +1,20 @@
 /**
  * =========================================================
- * REACTIVE CENTRAL STATE STORE (WITH FULL PROFILE MANAGEMENT)
+ * REACTIVE CENTRAL STATE STORE (AUTHENTICATION ENFORCED)
  * SmartEval OMR & AI Modular Architecture
  * =========================================================
  */
 
 const STORAGE_KEY = 'smarteval_state';
 const AUTH_KEY = 'smarteval_user';
+const USERS_DB_KEY = 'smarteval_registered_users';
 
 class Store {
   constructor() {
     this.state = {
-      isAuthenticated: true,
-      authMode: 'login',     // 'login' | 'register'
-      currentUser: {
-        fullName: 'Budi Santoso, M.Pd',
-        email: 'guru@sekolah.sch.id',
-        institution: 'SMA Negeri 1 Jakarta',
-        role: 'Guru Mata Pelajaran',
-        username: 'budi_guru',
-        status: 'Aktif'
-      },
+      isAuthenticated: false, // Default to FALSE so unauthenticated visitors see Login Page
+      authMode: 'login',      // 'login' | 'register'
+      currentUser: null,
       activeTab: 'tab-exam',
       selectedHistoryDetailId: null,
       isOpenCvReady: false,
@@ -95,10 +89,10 @@ class Store {
   login(user) {
     const fullUser = {
       fullName: user.fullName || 'Budi Santoso, M.Pd',
-      email: user.email || 'guru@sekolah.sch.id',
+      email: user.email,
       institution: user.institution || 'SMA Negeri 1 Jakarta',
       role: user.role || 'Guru Mata Pelajaran',
-      username: user.username || 'budi_guru',
+      username: user.username || user.email.split('@')[0] || 'guru',
       status: 'Aktif'
     };
     this.setState({
@@ -118,6 +112,14 @@ class Store {
       username: user.email.split('@')[0] || 'guru',
       status: 'Aktif'
     };
+
+    // Save to users DB
+    try {
+      const db = JSON.parse(localStorage.getItem(USERS_DB_KEY) || '[]');
+      db.push(fullUser);
+      localStorage.setItem(USERS_DB_KEY, JSON.stringify(db));
+    } catch (e) {}
+
     this.setState({
       isAuthenticated: true,
       currentUser: fullUser,
@@ -129,6 +131,7 @@ class Store {
   logout() {
     this.setState({
       isAuthenticated: false,
+      currentUser: null,
       authMode: 'login'
     });
     localStorage.removeItem(AUTH_KEY);
@@ -264,7 +267,15 @@ class Store {
     try {
       const authData = localStorage.getItem(AUTH_KEY);
       if (authData) {
-        this.state.currentUser = { ...this.state.currentUser, ...JSON.parse(authData) };
+        const user = JSON.parse(authData);
+        if (user && user.email) {
+          this.state.currentUser = user;
+          this.state.isAuthenticated = true;
+        } else {
+          this.state.isAuthenticated = false;
+        }
+      } else {
+        this.state.isAuthenticated = false;
       }
 
       const data = localStorage.getItem(STORAGE_KEY);
