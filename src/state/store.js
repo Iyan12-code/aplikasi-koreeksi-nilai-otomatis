@@ -1,6 +1,6 @@
 /**
  * =========================================================
- * REACTIVE CENTRAL STATE STORE (AUTHENTICATION ENFORCED)
+ * REACTIVE CENTRAL STATE STORE (WITH ONBOARDING SPLASH)
  * SmartEval OMR & AI Modular Architecture
  * =========================================================
  */
@@ -15,12 +15,13 @@ class Store {
       isAuthenticated: false, // Default to FALSE so unauthenticated visitors see Login Page
       authMode: 'login',      // 'login' | 'register'
       currentUser: null,
+      showOnboardingSplash: false, // Splash screen shown after login/register
       activeTab: 'tab-exam',
       selectedHistoryDetailId: null,
       isOpenCvReady: false,
       isAiLoading: false,
       exam: {
-        subject: 'Matematika Kelas 6',
+        subject: 'Matematika Kelas X MIPA 1',
         kkm: 75,
         totalQuestions: 25,
       },
@@ -74,7 +75,11 @@ class Store {
     this.listeners.forEach(listener => listener(this.state));
   }
 
-  // PROFILE ACTIONS
+  // PROFILE & ONBOARDING ACTIONS
+  dismissOnboardingSplash() {
+    this.setState({ showOnboardingSplash: false });
+  }
+
   updateUserProfile(updatedData) {
     const updatedUser = { ...this.state.currentUser, ...updatedData };
     this.setState({ currentUser: updatedUser });
@@ -98,7 +103,8 @@ class Store {
     this.setState({
       isAuthenticated: true,
       currentUser: fullUser,
-      activeTab: 'tab-exam'
+      activeTab: 'tab-exam',
+      showOnboardingSplash: true, // Trigger onboarding guide on login
     });
     localStorage.setItem(AUTH_KEY, JSON.stringify(fullUser));
   }
@@ -123,7 +129,8 @@ class Store {
     this.setState({
       isAuthenticated: true,
       currentUser: fullUser,
-      activeTab: 'tab-exam'
+      activeTab: 'tab-exam',
+      showOnboardingSplash: true, // Trigger onboarding guide on register
     });
     localStorage.setItem(AUTH_KEY, JSON.stringify(fullUser));
   }
@@ -132,7 +139,8 @@ class Store {
     this.setState({
       isAuthenticated: false,
       currentUser: null,
-      authMode: 'login'
+      authMode: 'login',
+      showOnboardingSplash: false,
     });
     localStorage.removeItem(AUTH_KEY);
   }

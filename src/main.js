@@ -1,6 +1,6 @@
 /**
  * =========================================================
- * ROOT MAIN ENTRY POINT & EVENT BINDER (WITH PROFILE CRUD)
+ * ROOT MAIN ENTRY POINT & EVENT BINDER (WITH ONBOARDING SPLASH)
  * SmartEval OMR & AI Modular Web Application
  * =========================================================
  */
@@ -18,6 +18,7 @@ import { renderHistoryTab } from './components/HistoryTab.js';
 import { renderDetailViewTab } from './components/DetailViewTab.js';
 import { renderAuthView } from './components/AuthView.js';
 import { renderProfileModal } from './components/ProfileModal.js';
+import { renderOnboardingSplash } from './components/OnboardingSplash.js';
 
 import { processOmrImage } from './services/omrService.js';
 import { buildDiagnosticPrompt, callGroqAi, generateLocalDiagnosticFallback } from './services/aiService.js';
@@ -25,6 +26,11 @@ import { parseStudentsFromExcel, exportFullExcelReport } from './services/excelS
 
 // Global App Object for inline template handlers & CRUD & Auth & Profile
 window.app = {
+  // ONBOARDING SPLASH HANDLERS
+  dismissOnboardingSplash() {
+    store.dismissOnboardingSplash();
+  },
+
   // PROFILE MANAGEMENT HANDLERS
   openProfileModal() {
     const modal = document.getElementById('profileModal');
@@ -502,6 +508,7 @@ function renderApp() {
       </main>
     </div>
     ${renderProfileModal()}
+    ${renderOnboardingSplash()}
   `;
 
   bindEvents();
@@ -724,6 +731,14 @@ function bindEvents() {
   inputSearchHistory?.addEventListener('input', filterHistory);
   filterStatusHistory?.addEventListener('change', filterHistory);
 }
+
+// Global Keyboard Listener for Onboarding Dismiss
+window.addEventListener('keydown', (e) => {
+  const state = store.getState();
+  if (state.showOnboardingSplash && (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ')) {
+    store.dismissOnboardingSplash();
+  }
+});
 
 // Subscribe to store updates & render
 store.subscribe(() => {
