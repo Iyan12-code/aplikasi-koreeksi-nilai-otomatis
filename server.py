@@ -121,15 +121,8 @@ def process_native_omr(image_base64, keys, total_questions=25):
                     scores.append(score)
 
                 max_score = max(scores)
-                min_score = min(scores)
                 max_idx = scores.index(max_score)
-                # Adaptive detection: check if there is a dominant marked bubble
-                if max_score > 5 and (max_score > min_score * 1.15 or max_score - min_score >= 4):
-                    ans = OPTIONS[max_idx]
-                elif max_score > 0:
-                    ans = OPTIONS[max_idx]
-                else:
-                    ans = "A"
+                ans = OPTIONS[max_idx] if max_score > 18 else "A"
 
                 key_ans = keys[q_num - 1] if q_num - 1 < len(keys) else "A"
                 is_correct = (ans.upper() == key_ans.upper())
