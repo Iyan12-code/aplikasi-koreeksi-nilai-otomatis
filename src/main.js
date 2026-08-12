@@ -1,6 +1,6 @@
 /**
  * =========================================================
- * ROOT MAIN ENTRY POINT & EVENT BINDER (CLEAN - NO GEAR SETTINGS)
+ * ROOT MAIN ENTRY POINT & EVENT BINDER (WITH PROFILE CRUD)
  * SmartEval OMR & AI Modular Web Application
  * =========================================================
  */
@@ -51,12 +51,21 @@ window.app = {
       return;
     }
 
-    store.updateUserProfile({
+    const updated = {
       fullName: fullName.trim(),
       institution: institution.trim(),
       role: role.trim() || 'Guru Mata Pelajaran',
       email: email.trim(),
-    });
+    };
+
+    store.updateUserProfile(updated);
+
+    // Update in users DB as well
+    try {
+      let db = JSON.parse(localStorage.getItem('smarteval_registered_users') || '[]');
+      db = db.map(u => u.email.toLowerCase() === updated.email.toLowerCase() ? { ...u, ...updated } : u);
+      localStorage.setItem('smarteval_registered_users', JSON.stringify(db));
+    } catch (e) {}
 
     showToast("Profil pendidik berhasil diperbarui!", "success");
     this.closeProfileModal();
@@ -82,7 +91,7 @@ window.app = {
   },
 
   handleLogin() {
-    const email = document.getElementById('loginEmail')?.value || '';
+    const email = (document.getElementById('loginEmail')?.value || '').trim();
     const password = document.getElementById('loginPassword')?.value || '';
 
     if (!email || !password) {
@@ -90,23 +99,37 @@ window.app = {
       return;
     }
 
-    const state = store.getState();
-    const user = {
-      fullName: state.currentUser?.fullName || 'Budi Santoso, M.Pd',
-      email: email,
-      institution: state.currentUser?.institution || 'SMA Negeri 1 Jakarta',
-      role: state.currentUser?.role || 'Guru Mata Pelajaran',
-      username: state.currentUser?.username || 'budi_guru',
-    };
+    // Lookup user in local database of registered users
+    let foundUser = null;
+    try {
+      const db = JSON.parse(localStorage.getItem('smarteval_registered_users') || '[]');
+      foundUser = db.find(u => u.email.toLowerCase() === email.toLowerCase());
+    } catch (e) {}
 
-    store.login(user);
-    showToast(`Selamat datang kembali, ${user.fullName}!`, "success");
+    let userToLogin;
+    if (foundUser) {
+      userToLogin = foundUser;
+    } else {
+      const prefix = email.split('@')[0] || 'guru';
+      const formattedName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+      userToLogin = {
+        fullName: `${formattedName}, S.Pd`,
+        email: email,
+        institution: 'SMA Negeri 1 Jakarta',
+        role: 'Guru Mata Pelajaran',
+        username: prefix,
+        status: 'Aktif'
+      };
+    }
+
+    store.login(userToLogin);
+    showToast(`Selamat datang kembali, ${userToLogin.fullName}!`, "success");
   },
 
   handleRegister() {
-    const fullName = document.getElementById('regFullName')?.value || '';
-    const email = document.getElementById('regEmail')?.value || '';
-    const institution = document.getElementById('regInstitution')?.value || '';
+    const fullName = (document.getElementById('regFullName')?.value || '').trim();
+    const email = (document.getElementById('regEmail')?.value || '').trim();
+    const institution = (document.getElementById('regInstitution')?.value || '').trim();
     const password = document.getElementById('regPassword')?.value || '';
     const confirmPassword = document.getElementById('regConfirmPassword')?.value || '';
 
@@ -121,11 +144,12 @@ window.app = {
     }
 
     const newUser = {
-      fullName: fullName.trim(),
-      email: email.trim(),
-      institution: institution.trim(),
+      fullName: fullName,
+      email: email,
+      institution: institution,
       role: 'Guru Mata Pelajaran',
       username: email.split('@')[0] || 'guru',
+      status: 'Aktif'
     };
 
     store.register(newUser);
