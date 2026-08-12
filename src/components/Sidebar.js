@@ -20,10 +20,10 @@ export function renderSidebar() {
 
   const menuItems = [
     { id: 'tab-exam', icon: 'fa-user-graduate', title: '1. Input Data Siswa', sub: 'Daftar Siswa & Asesmen' },
-    { id: 'tab-key', icon: 'fa-key', title: '2. Kunci & Kisi-kisi', sub: `${totalQ} Butir Indikator` },
-    { id: 'tab-omr', icon: 'fa-camera', title: '3. Koreksi OMR AI', sub: 'Pemindaian Lembar LJK' },
-    { id: 'tab-analysis', icon: 'fa-robot', title: '4. Analisis Diagnostik', sub: 'LLaMA 3.3 Remedial' },
-    { id: 'tab-history', icon: 'fa-clock-rotate-left', title: '5. Riwayat & Ekspor', sub: 'Laporan Excel ASKA' },
+    { id: 'tab-key', icon: 'fa-key', title: '2. Input Kunci & Kisi-kisi', sub: `${totalQ} Butir Indikator` },
+    { id: 'tab-omr', icon: 'fa-camera', title: '3. Koreksi Lembar Jawaban Siswa', sub: 'Pemindaian Lembar LJK' },
+    { id: 'tab-analysis', icon: 'fa-robot', title: '4. Analisis AI', sub: 'Deskripsi Analisis Siswa' },
+    { id: 'tab-history', icon: 'fa-clock-rotate-left', title: '5. Riwayat & Ekspor', sub: 'Laporan Excel Analisis' },
   ];
 
   return `
@@ -36,7 +36,7 @@ export function renderSidebar() {
           </button>
         </div>
 
-        <span class="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 px-3 hidden md:block">Menu Asesmen</span>
+        <span class="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 px-3 hidden md:block">Menu Aplikasi</span>
 
         ${menuItems.map(item => {
           const isActive = state.activeTab === item.id;
