@@ -17,7 +17,7 @@ export function renderExamTab() {
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold mb-2">
           <i class="fa-solid fa-layer-group"></i> Langkah 1 dari 5
         </div>
-        <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Konfigurasi Asesmen & Data Siswa</h2>
+        <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Input Data Siswa</h2>
         <p class="text-sm text-slate-400 mt-1">Tentukan mata pelajaran, standar KKM, jumlah butir soal, dan unggah daftar nama siswa.</p>
       </div>
 

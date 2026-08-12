@@ -19,7 +19,7 @@ export function renderSidebar() {
   const totalQ = state.exam.totalQuestions || 25;
 
   const menuItems = [
-    { id: 'tab-exam', icon: 'fa-clipboard-list', title: '1. Manajemen Ujian', sub: 'Konfigurasi & Siswa' },
+    { id: 'tab-exam', icon: 'fa-user-graduate', title: '1. Input Data Siswa', sub: 'Daftar Siswa & Asesmen' },
     { id: 'tab-key', icon: 'fa-key', title: '2. Kunci & Kisi-kisi', sub: `${totalQ} Butir Indikator` },
     { id: 'tab-omr', icon: 'fa-camera', title: '3. Koreksi OMR AI', sub: 'Pemindaian Lembar LJK' },
     { id: 'tab-analysis', icon: 'fa-robot', title: '4. Analisis Diagnostik', sub: 'LLaMA 3.3 Remedial' },

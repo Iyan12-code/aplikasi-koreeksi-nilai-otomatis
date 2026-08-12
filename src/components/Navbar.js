@@ -16,7 +16,7 @@ export function renderNavbar() {
   };
 
   const stepLabels = {
-    'tab-exam': 'Langkah 1/5: Konfigurasi Asesmen',
+    'tab-exam': 'Langkah 1/5: Input Data Siswa',
     'tab-key': 'Langkah 2/5: Kunci & Kisi-kisi',
     'tab-omr': 'Langkah 3/5: Koreksi OMR Siswa',
     'tab-analysis': 'Langkah 4/5: Analisis AI Diagnostik',
