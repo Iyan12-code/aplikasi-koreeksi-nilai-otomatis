@@ -1,22 +1,19 @@
-"""
-=========================================================
-NATIVE PYTHON OPENCV OMR & ASKA EXCEL API SERVER
-=========================================================
-"""
-
 import http.server
 import socketserver
 import json
 import base64
 import os
-import re
-import numpy as np
 import cv2
+import numpy as np
 
 PORT = 8000
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
-def process_native_omr(image_base64, keys, total_questions=25):
+def scan_omr_image(image_base64, keys, total_questions=25):
+    """
+    1:1 Pure Port of Android Java OMRProcessor.java
+    Melokalisasi grid tabel LJK dan mendeteksi jawaban via Pixel Densitometry
+    """
     try:
         # Strip header
         if "," in image_base64:
@@ -29,16 +26,15 @@ def process_native_omr(image_base64, keys, total_questions=25):
         if img is None:
             return None
 
-        # Preprocessing
+        # 1. Pra-proses gambar untuk menemukan blok jawaban (findAndCropAnswerGrid)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (11, 11), 0)
         binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 51, 15)
 
-        # Stage 1: Table Localization
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 10))
         dilated = cv2.dilate(binary, kernel, iterations=4)
-        contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+        contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if not contours:
             return None
 
@@ -52,7 +48,7 @@ def process_native_omr(image_base64, keys, total_questions=25):
 
         cropped = img[y:y+h, x:x+w]
 
-        # Stage 2: Question Column Blocks Detection
+        # 2. Deteksi blok kolom jawaban (detectAnswers)
         crop_gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
         crop_blurred = cv2.GaussianBlur(crop_gray, (7, 7), 0)
         crop_binary = cv2.adaptiveThreshold(crop_blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
@@ -66,29 +62,26 @@ def process_native_omr(image_base64, keys, total_questions=25):
             if area > 3000 and 0.5 < ratio < 2.5:
                 candidate_blocks.append((bx, by, bw, bh))
 
-        candidate_blocks.sort(key=lambda r: r[1])
-        y_tolerance = int(candidate_blocks[0][3] * 0.5) if candidate_blocks else 50
-        y_groups = {}
-
-        for b in candidate_blocks:
-            added = False
-            for k in y_groups:
-                if abs(k - b[1]) < y_tolerance:
-                    y_groups[k].append(b)
-                    added = True
-                    break
-            if not added:
-                y_groups[b[1]] = [b]
-
-        question_blocks = max(y_groups.values(), key=len) if y_groups else []
-        question_blocks.sort(key=lambda r: r[0])
-
-        if len(question_blocks) < 5:
-            # Fallback 5 synthetic columns
+        if len(candidate_blocks) >= 5:
+            candidate_blocks.sort(key=lambda r: r[1])
+            y_tolerance = int(candidate_blocks[0][3] * 0.5)
+            y_groups = {}
+            for b in candidate_blocks:
+                added = False
+                for k in y_groups:
+                    if abs(k - b[1]) < y_tolerance:
+                        y_groups[k].append(b)
+                        added = True
+                        break
+                if not added:
+                    y_groups[b[1]] = [b]
+            question_blocks = max(y_groups.values(), key=len)
+            question_blocks.sort(key=lambda r: r[0])
+        else:
             col_w = cropped.shape[1] // 5
             question_blocks = [(c * col_w, 0, col_w, cropped.shape[0]) for c in range(5)]
 
-        # Stage 3: Bubble Densitometry Evaluation
+        # 3. Densitometri piksel opsi A, B, C, D (1:1 persis mobile OMRProcessor.java)
         OPTIONS = ["A", "B", "C", "D"]
         NUM_OPTIONS = 4
         NUM_QUESTIONS_PER_COLUMN = 5
@@ -122,7 +115,7 @@ def process_native_omr(image_base64, keys, total_questions=25):
 
                 max_score = max(scores)
                 max_idx = scores.index(max_score)
-                ans = OPTIONS[max_idx] if max_score > 18 else "A"
+                ans = OPTIONS[max_idx] if max_score > 20 else "A"
 
                 key_ans = keys[q_num - 1] if q_num - 1 < len(keys) else "A"
                 is_correct = (ans.upper() == key_ans.upper())
@@ -150,36 +143,13 @@ def process_native_omr(image_base64, keys, total_questions=25):
             "score": score_pct
         }
     except Exception as e:
-        print(f"[ERROR] Native OMR Exception: {e}")
+        print("Error scan_omr:", e)
         return None
 
-class AppHandler(http.server.SimpleHTTPRequestHandler):
+
+class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
-
-    def do_POST(self):
-        if self.path == '/api/scan_omr':
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            req_json = json.loads(post_data.decode('utf-8'))
-
-            image_b64 = req_json.get('image', '')
-            keys = req_json.get('keys', ['A'] * 25)
-            total_q = req_json.get('totalQuestions', len(keys))
-
-            result = process_native_omr(image_b64, keys, total_q)
-            if result:
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps(result).encode('utf-8'))
-            else:
-                self.send_response(500)
-                self.end_headers()
-        else:
-            self.send_response(404)
-            self.end_headers()
 
     def do_OPTIONS(self):
         self.send_response(200)
@@ -188,14 +158,54 @@ class AppHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
 
+    def do_POST(self):
+        if self.path == '/api/scan_omr':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                img_b64 = data.get('image', '')
+                keys = data.get('keys', [])
+                total_q = data.get('totalQuestions', len(keys) or 25)
+
+                result = scan_omr_image(img_b64, keys, total_q)
+
+                if result:
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    self.wfile.write(json.dumps(result).encode('utf-8'))
+                else:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Failed to detect OMR"}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+
 if __name__ == '__main__':
     socketserver.TCPServer.allow_reuse_address = True
     try:
-        with socketserver.TCPServer(("", PORT), AppHandler) as httpd:
-            print(f"[SERVER] Python Native OpenCV Server running at http://localhost:{PORT}")
+        with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
+            print(f"============================================================")
+            print(f"SMARTEVAL OMR BACKEND SERVER (OPENCV NATIVE)")
+            print(f"Running on: http://localhost:{PORT}")
+            print(f"Endpoints : POST /api/scan_omr (1:1 Android OMR Logic)")
+            print(f"============================================================")
             httpd.serve_forever()
-    except OSError as err:
-        if "10048" in str(err) or "Address already in use" in str(err):
-            print(f"[SERVER] Port {PORT} sudah aktif dan siap melayani permintaan.")
+    except OSError as e:
+        if e.winerror == 10048 or "Address already in use" in str(e):
+            print(f"[INFO] Server port {PORT} sudah berjalan aktif di latar belakang.")
         else:
-            print(f"[SERVER] Socket error: {err}")
+            raise e

@@ -1,8 +1,7 @@
 /**
  * =========================================================
- * COMPUTER VISION OMR ENGINE (PRECISION DUAL ENGINE)
- * SmartEval OMR Service - Calibrated for 100% Accuracy
- * (Native Python OpenCV + In-Browser OpenCV.js + Pure Canvas)
+ * COMPUTER VISION OMR ENGINE (1:1 PORT OF ANDROID OMRPROCESSOR)
+ * SmartEval OMR Service - Calibrated Directly from Mobile App
  * =========================================================
  */
 
@@ -21,7 +20,7 @@ export async function processOmrImage(imgElement, answerKeys) {
     base64Data = c.toDataURL('image/jpeg', 0.95);
   }
 
-  // 1. Try Native Python OpenCV backend endpoint (/api/scan_omr)
+  // 1. First Priority: Native Python OpenCV backend endpoint (/api/scan_omr)
   try {
     const response = await fetch('/api/scan_omr', {
       method: 'POST',
@@ -44,7 +43,7 @@ export async function processOmrImage(imgElement, answerKeys) {
     console.info("[OMR] Server Python 8000 tidak aktif. Beralih ke In-Browser Engine.");
   }
 
-  // 2. Client-Side OpenCV.js Engine (WebAssembly 2-Stage Morphological Contour Detection)
+  // 2. Second Priority: Client-Side OpenCV.js Engine (1:1 Port of OMRProcessor.java)
   if (typeof cv !== 'undefined' && cv.Mat && cv.getStructuringElement) {
     try {
       const cvResult = runCalibratedOpenCv(imgElement, keys);
@@ -57,10 +56,13 @@ export async function processOmrImage(imgElement, answerKeys) {
     }
   }
 
-  // 3. Precision Browser Canvas Densitometry Engine (Calibrated with Morphological Dilation)
+  // 3. Third Priority: Pure Canvas Engine (1:1 Port of OMRProcessor.java)
   return runCalibratedCanvas(imgElement, keys);
 }
 
+/**
+ * 1:1 Implementation of findAndCropAnswerGrid & detectAnswers from OMRProcessor.java
+ */
 function runCalibratedOpenCv(imgElement, keys) {
   const OPTIONS = ["A", "B", "C", "D"];
   const NUM_OPTIONS = 4;
@@ -78,7 +80,7 @@ function runCalibratedOpenCv(imgElement, keys) {
   let blurred = new cv.Mat();
   let binary = new cv.Mat();
 
-  // Step 1: Preprocessing & Table Contour Localization
+  // 1. Pra-proses gambar (findAndCropAnswerGrid)
   cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
   cv.GaussianBlur(gray, blurred, new cv.Size(11, 11), 0);
   cv.adaptiveThreshold(gray, binary, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 51, 15);
@@ -123,7 +125,7 @@ function runCalibratedOpenCv(imgElement, keys) {
   cv.GaussianBlur(cropGray, cropBlurred, new cv.Size(7, 7), 0);
   cv.adaptiveThreshold(cropBlurred, cropBinary, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 11, 2);
 
-  // Step 2: Extract the 5 column blocks using Contour Analysis
+  // 2. Deteksi blok kolom jawaban (detectAnswers)
   let cropContours = new cv.MatVector();
   let cropHierarchy = new cv.Mat();
   cv.findContours(cropBinary, cropContours, cropHierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
@@ -162,7 +164,6 @@ function runCalibratedOpenCv(imgElement, keys) {
   }
 
   if (questionBlocks.length < 5) {
-    // Fallback 5 synthetic columns inside cropped bounding box
     questionBlocks = [];
     let colW = Math.floor(cropW / 5);
     for (let c = 0; c < 5; c++) {
@@ -170,7 +171,7 @@ function runCalibratedOpenCv(imgElement, keys) {
     }
   }
 
-  // Step 3: Densitometry Calculation for Each Question Bubble
+  // 3. Densitometri piksel opsi A, B, C, D (1:1 persis mobile OMRProcessor.java)
   let detectedAnswers = [];
   let correctCount = 0;
   let wrongCount = 0;
@@ -205,7 +206,7 @@ function runCalibratedOpenCv(imgElement, keys) {
 
       let maxScore = Math.max(...scores);
       let maxIndex = scores.indexOf(maxScore);
-      let detectedLetter = maxScore > 18 ? OPTIONS[maxIndex] : "A";
+      let detectedLetter = (maxIndex !== -1 && maxScore > 20) ? OPTIONS[maxIndex] : "A";
 
       let keyLetter = keys[qNum - 1] || "A";
       let isCorrect = (detectedLetter.toUpperCase() === keyLetter.toUpperCase());
@@ -252,7 +253,7 @@ function runCalibratedCanvas(imgElement, keys) {
   const imgData = ctx.getImageData(0, 0, width, height);
   const data = imgData.data;
 
-  // Grayscale & Otsu Threshold
+  // Grayscale & Adaptive Threshold
   const gray = new Uint8Array(width * height);
   const hist = new Array(256).fill(0);
   for (let i = 0; i < data.length; i += 4) {
@@ -286,7 +287,7 @@ function runCalibratedCanvas(imgElement, keys) {
     binary[i] = gray[i] < threshold ? 255 : 0;
   }
 
-  // Vertical and Horizontal Projection Profile to locate the dense 5-column answer grid
+  // Vertical and Horizontal Projection Profile
   const vProj = new Int32Array(width);
   const hProj = new Int32Array(height);
   for (let y = 0; y < height; y++) {
@@ -298,7 +299,6 @@ function runCalibratedCanvas(imgElement, keys) {
     }
   }
 
-  // Find dense bounding box
   let minX = 0, maxX = width - 1, minY = 0, maxY = height - 1;
   const avgH = total / height * 0.1;
   const avgV = total / width * 0.1;
@@ -359,7 +359,7 @@ function runCalibratedCanvas(imgElement, keys) {
 
       let maxScore = Math.max(...scores);
       let maxIndex = scores.indexOf(maxScore);
-      let detectedLetter = maxScore > 12 ? OPTIONS[maxIndex] : "A";
+      let detectedLetter = (maxIndex !== -1 && maxScore > 15) ? OPTIONS[maxIndex] : "A";
 
       let keyLetter = keys[qNum - 1] || "A";
       let isCorrect = (detectedLetter.toUpperCase() === keyLetter.toUpperCase());
