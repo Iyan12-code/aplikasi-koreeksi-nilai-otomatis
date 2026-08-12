@@ -20,7 +20,7 @@ class Store {
       isOpenCvReady: false,
       isAiLoading: false,
       exam: {
-        subject: 'Matematika Kelas X MIPA 1',
+        subject: 'Matematika Kelas 6',
         kkm: 75,
         totalQuestions: 25,
       },

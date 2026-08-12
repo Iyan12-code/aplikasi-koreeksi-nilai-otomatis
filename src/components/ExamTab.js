@@ -29,7 +29,7 @@ export function renderExamTab() {
               <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm font-bold">
                 <i class="fa-solid fa-sliders"></i>
               </div>
-              <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">Parameter Asesmen</h3>
+              <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">Input Mata pelajaran</h3>
             </div>
 
             <div class="space-y-5">
@@ -101,7 +101,7 @@ export function renderExamTab() {
                 <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">
                   <i class="fa-solid fa-file-excel"></i>
                 </div>
-                <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">Impor Daftar Siswa Excel</h3>
+                <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">Impor Dokumen Analisis</h3>
               </div>
               <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full" id="studentCountBadge">
                 ${state.students.length} Siswa Terdaftar

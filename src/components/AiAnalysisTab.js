@@ -19,7 +19,7 @@ export function renderAiAnalysisTab() {
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold mb-2">
             <i class="fa-solid fa-layer-group"></i> Langkah 4 dari 5
           </div>
-          <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Analisis Diagnostik AI (LLaMA 3.3 via Groq)</h2>
+          <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Analisis AI</h2>
           <p class="text-sm text-slate-400 mt-1">Evaluasi mendalam per materi indikator kisi-kisi, saran remedial, dan strategi pembelajaran guru di kelas.</p>
         </div>
         <button class="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/25 flex items-center gap-2 transition-all shrink-0" onclick="window.app.generateAIAnalysis()">
@@ -31,7 +31,7 @@ export function renderAiAnalysisTab() {
         <div class="flex justify-between items-center pb-4 mb-4 border-b border-white/10">
           <div class="flex items-center gap-3">
             <span class="px-3 py-1 bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold rounded-full flex items-center gap-1.5">
-              <i class="fa-solid fa-microchip"></i> LLaMA 3.3 70B Versatile
+              <i class="fa-solid fa-microchip"></i> Analisis AI
             </span>
             <span class="text-xs font-bold text-slate-300">Target Siswa: <span class="text-white font-extrabold">${currentStudentName}</span></span>
           </div>

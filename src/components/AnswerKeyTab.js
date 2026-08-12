@@ -19,7 +19,7 @@ export function renderAnswerKeyTab() {
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold mb-2">
             <i class="fa-solid fa-layer-group"></i> Langkah 2 dari 5
           </div>
-          <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Kunci Jawaban & Indikator Materi (${totalQ} Soal)</h2>
+          <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Input Kunci Jawaban & Indikator Materi (${totalQ} Soal)</h2>
           <p class="text-sm text-slate-400 mt-1">Atur opsi kunci jawaban (A/B/C/D) dan nama materi indikator pembelajaran untuk masing-masing butir soal.</p>
         </div>
 
@@ -36,7 +36,7 @@ export function renderAnswerKeyTab() {
       <div class="glass-card p-4 md:p-5 mb-6 border-indigo-500/30 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-slate-900/60">
         <div class="flex items-center gap-2 mb-2.5">
           <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm"></i>
-          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Pengaturan Cepat Indikator Materi (Rentang Soal):</h3>
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Masukan Materi Rentang Soal</h3>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
           <div class="sm:col-span-6">
@@ -98,7 +98,7 @@ export function renderAnswerKeyTab() {
           <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Konfigurasi
         </button>
         <button type="button" class="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/25 flex items-center gap-2 transition-all" onclick="window.app.goToTab('tab-omr')">
-          Lanjut ke Koreksi OMR <i class="fa-solid fa-arrow-right"></i>
+          Lanjut ke Koreksi Siswa<i class="fa-solid fa-arrow-right"></i>
         </button>
       </div>
     </section>

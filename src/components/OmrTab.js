@@ -43,7 +43,7 @@ export function renderOmrTab() {
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold mb-2">
             <i class="fa-solid fa-layer-group"></i> Langkah 3 dari 5
           </div>
-          <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Pemindaian & Koreksi OMR Siswa (${totalQ} Soal)</h2>
+          <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Pemindaian & Koreksi Lembar Jawaban Siswa (${totalQ} Soal)</h2>
           <p class="text-sm text-slate-400 mt-1">Pilih nama siswa dari daftar kelas, unggah lembar LJK, lalu simpan nilai untuk diekspor ke Excel.</p>
         </div>
 
