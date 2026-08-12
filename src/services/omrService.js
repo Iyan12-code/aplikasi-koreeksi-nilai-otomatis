@@ -204,8 +204,11 @@ function runCalibratedOpenCv(imgElement, keys) {
       }
 
       let maxScore = Math.max(...scores);
+      let minScore = Math.min(...scores);
       let maxIndex = scores.indexOf(maxScore);
-      let detectedLetter = maxScore > 18 ? OPTIONS[maxIndex] : "A";
+      let detectedLetter = (maxScore > 5 && (maxScore > minScore * 1.15 || maxScore - minScore >= 4))
+        ? OPTIONS[maxIndex]
+        : (maxScore > 0 ? OPTIONS[maxIndex] : "A");
 
       let keyLetter = keys[qNum - 1] || "A";
       let isCorrect = (detectedLetter.toUpperCase() === keyLetter.toUpperCase());
@@ -358,8 +361,11 @@ function runCalibratedCanvas(imgElement, keys) {
       }
 
       let maxScore = Math.max(...scores);
+      let minScore = Math.min(...scores);
       let maxIndex = scores.indexOf(maxScore);
-      let detectedLetter = maxScore > 12 ? OPTIONS[maxIndex] : "A";
+      let detectedLetter = (maxScore > 3 && (maxScore > minScore * 1.15 || maxScore - minScore >= 3))
+        ? OPTIONS[maxIndex]
+        : (maxScore > 0 ? OPTIONS[maxIndex] : "A");
 
       let keyLetter = keys[qNum - 1] || "A";
       let isCorrect = (detectedLetter.toUpperCase() === keyLetter.toUpperCase());

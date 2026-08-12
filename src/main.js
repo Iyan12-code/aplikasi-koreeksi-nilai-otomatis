@@ -237,26 +237,62 @@ window.app = {
     }
   },
 
+  resetLjkUploadUi() {
+    const ljkPreviewWrapper = document.getElementById('ljkPreviewWrapper');
+    const ljkDropzone = document.getElementById('ljkDropzone');
+    const ljkPreviewImg = document.getElementById('ljkPreviewImg');
+    const ljkFileInput = document.getElementById('ljkFileInput');
+
+    if (ljkPreviewWrapper) ljkPreviewWrapper.classList.add('hidden');
+    if (ljkDropzone) ljkDropzone.classList.remove('hidden');
+    if (ljkPreviewImg) ljkPreviewImg.src = '';
+    if (ljkFileInput) ljkFileInput.value = '';
+  },
+
   prevStudent() {
-    const { activeStudentIndex, students } = store.getState();
+    const { activeStudentIndex, students, history } = store.getState();
     if (activeStudentIndex > 0) {
-      store.setActiveStudentIndex(activeStudentIndex - 1);
-      showToast(`Beralih ke siswa: ${students[activeStudentIndex - 1]}`, "info");
+      const newIdx = activeStudentIndex - 1;
+      store.setActiveStudentIndex(newIdx);
+      this.resetLjkUploadUi();
+      const sName = students[newIdx];
+      const saved = history.find(h => h.studentName === sName);
+      if (saved) {
+        showToast(`Memuat nilai tersimpan: ${sName} (${saved.score}/100)`, "info");
+      } else {
+        showToast(`Silakan unggah foto lembar LJK untuk: ${sName}`, "info");
+      }
     }
   },
 
   nextStudent() {
-    const { activeStudentIndex, students } = store.getState();
+    const { activeStudentIndex, students, history } = store.getState();
     if (activeStudentIndex < students.length - 1) {
-      store.setActiveStudentIndex(activeStudentIndex + 1);
-      showToast(`Beralih ke siswa: ${students[activeStudentIndex + 1]}`, "info");
+      const newIdx = activeStudentIndex + 1;
+      store.setActiveStudentIndex(newIdx);
+      this.resetLjkUploadUi();
+      const sName = students[newIdx];
+      const saved = history.find(h => h.studentName === sName);
+      if (saved) {
+        showToast(`Memuat nilai tersimpan: ${sName} (${saved.score}/100)`, "info");
+      } else {
+        showToast(`Silakan unggah foto lembar LJK untuk: ${sName}`, "info");
+      }
     }
   },
 
   selectStudent(index) {
-    const { students } = store.getState();
-    store.setActiveStudentIndex(parseInt(index));
-    showToast(`Siap mengoreksi lembar LJK: ${students[parseInt(index)]}`, "info");
+    const idx = parseInt(index);
+    const { students, history } = store.getState();
+    store.setActiveStudentIndex(idx);
+    this.resetLjkUploadUi();
+    const sName = students[idx];
+    const saved = history.find(h => h.studentName === sName);
+    if (saved) {
+      showToast(`Memuat nilai tersimpan: ${sName} (${saved.score}/100)`, "info");
+    } else {
+      showToast(`Silakan unggah foto lembar LJK untuk: ${sName}`, "info");
+    }
   },
 
   saveToHistory() {
@@ -416,28 +452,15 @@ window.app = {
 
   async generateAIAnalysis() {
     const state = store.getState();
-    const totalQ = state.exam.totalQuestions || 25;
     const studentName = state.students[state.activeStudentIndex] || "Siswa";
     
-    store.setAiLoading(true);
-
     let omr = state.currentOmrResult;
-    if (!omr) {
-      const wrongIndices = new Set([1, 6, 15, 20].filter(i => i < totalQ));
-      const simulatedCorrect = totalQ - wrongIndices.size;
-      omr = {
-        score: Math.round((simulatedCorrect / totalQ) * 100),
-        correctCount: simulatedCorrect,
-        wrongCount: wrongIndices.size,
-        detectedAnswers: state.answerKeys.slice(0, totalQ).map((k, i) => ({
-          questionNumber: i + 1,
-          studentAnswer: wrongIndices.has(i) ? (k === 'A' ? 'B' : 'A') : k,
-          correctAnswer: k,
-          isCorrect: !wrongIndices.has(i),
-        })),
-      };
-      store.setOmrResult(omr);
+    if (!omr || !omr.detectedAnswers || omr.detectedAnswers.length === 0) {
+      showToast("Harap unggah dan jalankan koreksi lembar LJK siswa terlebih dahulu di Langkah 3!", "error");
+      return;
     }
+
+    store.setAiLoading(true);
 
     try {
       const prompt = buildDiagnosticPrompt(state.exam, studentName, omr, state.questionMaterials);

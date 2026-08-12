@@ -179,90 +179,106 @@ export function renderOmrTab() {
             </div>
           </div>
 
-          <!-- Score Banner -->
-          <div class="bg-gradient-to-r from-indigo-500/15 to-purple-500/15 border border-indigo-500/30 p-5 rounded-2xl shadow-inner flex justify-between items-center mb-4">
-            <div>
-              <span class="text-xs font-semibold text-slate-400 block">Nilai Siswa (${currentStudentName})</span>
-              <div class="flex items-baseline gap-1.5 mt-0.5">
-                <span class="text-4xl font-extrabold text-white leading-none">${omr ? omr.score : 0}</span>
-                <span class="text-sm font-bold text-slate-400">/ 100</span>
+          ${omr ? `
+            <!-- Score Banner -->
+            <div class="bg-gradient-to-r from-indigo-500/15 to-purple-500/15 border border-indigo-500/30 p-5 rounded-2xl shadow-inner flex justify-between items-center mb-4">
+              <div>
+                <span class="text-xs font-semibold text-slate-400 block">Nilai Siswa (${currentStudentName})</span>
+                <div class="flex items-baseline gap-1.5 mt-0.5">
+                  <span class="text-4xl font-extrabold text-white leading-none">${omr.score}</span>
+                  <span class="text-sm font-bold text-slate-400">/ 100</span>
+                </div>
+                <span class="text-xs font-extrabold mt-1 block ${omr.score >= kkm ? 'text-emerald-400' : 'text-rose-400'}">
+                  ${omr.score >= kkm ? `✔ TUNTAS KKM (≥ ${kkm})` : `✖ BELUM TUNTAS (< ${kkm})`}
+                </span>
               </div>
-              <span class="text-xs font-extrabold mt-1 block ${omr ? (omr.score >= kkm ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-400'}">
-                ${omr ? (omr.score >= kkm ? `✔ TUNTAS KKM (≥ ${kkm})` : `✖ BELUM TUNTAS (< ${kkm})`) : 'Belum Dikoreksi'}
-              </span>
+              <div class="space-y-2">
+                <div class="px-3.5 py-1.5 rounded-full bg-black/40 border border-white/5 text-xs font-bold text-emerald-400 flex items-center gap-2">
+                  <i class="fa-solid fa-circle-check"></i> <span>${omr.correctCount}/${totalQ} Benar</span>
+                </div>
+                <div class="px-3.5 py-1.5 rounded-full bg-black/40 border border-white/5 text-xs font-bold text-rose-400 flex items-center gap-2">
+                  <i class="fa-solid fa-circle-xmark"></i> <span>${omr.wrongCount}/${totalQ} Salah</span>
+                </div>
+              </div>
             </div>
-            <div class="space-y-2">
-              <div class="px-3.5 py-1.5 rounded-full bg-black/40 border border-white/5 text-xs font-bold text-emerald-400 flex items-center gap-2">
-                <i class="fa-solid fa-circle-check"></i> <span>${omr ? omr.correctCount : 0}/${totalQ} Benar</span>
-              </div>
-              <div class="px-3.5 py-1.5 rounded-full bg-black/40 border border-white/5 text-xs font-bold text-rose-400 flex items-center gap-2">
-                <i class="fa-solid fa-circle-xmark"></i> <span>${omr ? omr.wrongCount : 0}/${totalQ} Salah</span>
-              </div>
-            </div>
-          </div>
 
-          <!-- Dynamic Topic Mastery Progress Bars -->
-          <div class="mb-4">
-            <h4 class="text-xs font-bold text-slate-300 mb-2.5 flex items-center gap-1.5">
-              <i class="fa-solid fa-chart-simple text-indigo-400"></i> Penguasaan per Indikator Pembelajaran:
+            <!-- Dynamic Topic Mastery Progress Bars -->
+            <div class="mb-4">
+              <h4 class="text-xs font-bold text-slate-300 mb-2.5 flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-simple text-indigo-400"></i> Penguasaan per Indikator Pembelajaran:
+              </h4>
+              <div class="space-y-2 max-h-44 overflow-y-auto p-1">
+                ${topicList.map(topic => {
+                  const totalTopicQ = topic.questionIndices.length;
+                  let correctTopicQ = 0;
+
+                  if (omr && omr.detectedAnswers) {
+                    topic.questionIndices.forEach(qIdx => {
+                      const ans = omr.detectedAnswers[qIdx];
+                      if (ans && ans.isCorrect) correctTopicQ++;
+                    });
+                  }
+
+                  const pct = Math.round((correctTopicQ / totalTopicQ) * 100);
+                  const isMastered = pct >= 75;
+                  const qRangeText = topic.questionIndices.map(i => i + 1).join(', ');
+
+                  return `
+                    <div>
+                      <div class="flex justify-between text-[11px] font-semibold mb-1">
+                        <span class="text-slate-300 truncate max-w-[220px]" title="${topic.name}">${topic.name} <span class="text-slate-500">(Soal ${qRangeText})</span></span>
+                        <span class="${isMastered ? 'text-emerald-400' : 'text-rose-400'} font-bold shrink-0">${pct}% (${correctTopicQ}/${totalTopicQ} Soal)</span>
+                      </div>
+                      <div class="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-700 ${isMastered ? 'bg-emerald-500' : 'bg-rose-500'}" style="width: ${pct}%;"></div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Dynamic Question Result Matrix Grid (1 to N) -->
+            <h4 class="text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-list-ol text-indigo-400"></i> Rincian ${totalQ} Butir Soal (${currentStudentName}):
             </h4>
-            <div class="space-y-2 max-h-44 overflow-y-auto p-1">
-              ${topicList.map(topic => {
-                const totalTopicQ = topic.questionIndices.length;
-                let correctTopicQ = 0;
-
-                if (omr && omr.detectedAnswers) {
-                  topic.questionIndices.forEach(qIdx => {
-                    const ans = omr.detectedAnswers[qIdx];
-                    if (ans && ans.isCorrect) correctTopicQ++;
-                  });
-                }
-
-                const pct = omr ? Math.round((correctTopicQ / totalTopicQ) * 100) : 0;
-                const isMastered = pct >= 75;
-                const qRangeText = topic.questionIndices.map(i => i + 1).join(', ');
-
+            <div class="grid grid-cols-4 sm:grid-cols-5 gap-1.5 bg-slate-950/60 p-2.5 rounded-xl border border-white/10 text-xs max-h-48 overflow-y-auto">
+              ${Array.from({ length: totalQ }).map((_, idx) => {
+                const item = (omr && omr.detectedAnswers) ? omr.detectedAnswers[idx] : null;
+                const isCorrect = item ? item.isCorrect : false;
                 return `
-                  <div>
-                    <div class="flex justify-between text-[11px] font-semibold mb-1">
-                      <span class="text-slate-300 truncate max-w-[220px]" title="${topic.name}">${topic.name} <span class="text-slate-500">(Soal ${qRangeText})</span></span>
-                      <span class="${isMastered ? 'text-emerald-400' : 'text-rose-400'} font-bold shrink-0">${pct}% (${correctTopicQ}/${totalTopicQ} Soal)</span>
-                    </div>
-                    <div class="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div class="h-full rounded-full transition-all duration-700 ${isMastered ? 'bg-emerald-500' : 'bg-rose-500'}" style="width: ${pct}%;"></div>
-                    </div>
+                  <div class="flex items-center justify-between px-2 py-1 rounded text-[11px] font-bold ${item ? (isCorrect ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20') : 'bg-white/5 text-slate-500'}">
+                    <span>${idx + 1}. ${item ? item.studentAnswer : '-'}</span>
+                    <span>${item ? (isCorrect ? '✔' : '✖') : ''}</span>
                   </div>
                 `;
               }).join('')}
             </div>
-          </div>
 
-          <!-- Dynamic Question Result Matrix Grid (1 to N) -->
-          <h4 class="text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
-            <i class="fa-solid fa-list-ol text-indigo-400"></i> Rincian ${totalQ} Butir Soal (${currentStudentName}):
-          </h4>
-          <div class="grid grid-cols-4 sm:grid-cols-5 gap-1.5 bg-slate-950/60 p-2.5 rounded-xl border border-white/10 text-xs max-h-48 overflow-y-auto">
-            ${Array.from({ length: totalQ }).map((_, idx) => {
-              const item = (omr && omr.detectedAnswers) ? omr.detectedAnswers[idx] : null;
-              const isCorrect = item ? item.isCorrect : false;
-              return `
-                <div class="flex items-center justify-between px-2 py-1 rounded text-[11px] font-bold ${item ? (isCorrect ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20') : 'bg-white/5 text-slate-500'}">
-                  <span>${idx + 1}. ${item ? item.studentAnswer : '-'}</span>
-                  <span>${item ? (isCorrect ? '✔' : '✖') : ''}</span>
-                </div>
-              `;
-            }).join('')}
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-5">
-            <button type="button" class="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-xl text-xs font-bold text-emerald-300 flex items-center justify-center gap-2 transition-all shadow-sm" onclick="window.app.saveToHistory()">
-              <i class="fa-solid fa-floppy-disk"></i> Simpan Nilai ${currentStudentName}
-            </button>
-            <button type="button" class="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all" onclick="window.app.goToTab('tab-analysis'); window.app.generateAIAnalysis();">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> Analisis AI <i class="fa-solid fa-arrow-right"></i>
-            </button>
-          </div>
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-5">
+              <button type="button" class="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-xl text-xs font-bold text-emerald-300 flex items-center justify-center gap-2 transition-all shadow-sm" onclick="window.app.saveToHistory()">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Nilai ${currentStudentName}
+              </button>
+              <button type="button" class="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all" onclick="window.app.goToTab('tab-analysis'); window.app.generateAIAnalysis();">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Analisis AI <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          ` : `
+            <!-- CLEAN EMPTY STATE NOTICE (NO DUMMY DATA) -->
+            <div class="flex flex-col items-center justify-center py-14 px-4 text-center bg-slate-950/40 rounded-2xl border-2 border-dashed border-white/10 my-auto">
+              <div class="w-16 h-16 rounded-3xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-2xl mb-3.5 shadow-inner">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+              </div>
+              <h4 class="text-sm font-bold text-white mb-1.5">Belum Ada Lembar LJK yang Dikoreksi</h4>
+              <p class="text-xs text-slate-400 max-w-sm leading-relaxed mb-4">
+                Silakan pilih atau unggah foto lembar jawaban milik <strong class="text-indigo-300 underline">${currentStudentName}</strong> pada kotak di sebelah kiri, lalu tekan tombol <em>"Jalankan Koreksi Otomatis"</em>.
+              </p>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[11px]">
+                <i class="fa-solid fa-circle-info text-indigo-400"></i> Nilai dan rincian jawaban akan muncul di sini setelah sensor OMR selesai
+              </span>
+            </div>
+          `}
         </div>
       </div>
     </section>

@@ -203,7 +203,27 @@ class Store {
 
   setActiveStudentIndex(index) {
     if (index >= 0 && index < this.state.students.length) {
-      this.setState({ activeStudentIndex: index });
+      const studentName = this.state.students[index];
+      const savedHistory = this.state.history.find(h => h.studentName === studentName);
+
+      if (savedHistory) {
+        this.setState({
+          activeStudentIndex: index,
+          currentOmrResult: {
+            score: savedHistory.score,
+            correctCount: savedHistory.correctCount,
+            wrongCount: savedHistory.wrongCount,
+            detectedAnswers: savedHistory.answers || [],
+          },
+          latestAiText: savedHistory.aiReport || '',
+        });
+      } else {
+        this.setState({
+          activeStudentIndex: index,
+          currentOmrResult: null,
+          latestAiText: '',
+        });
+      }
     }
   }
 
@@ -228,11 +248,46 @@ class Store {
   }
 
   setOmrResult(result) {
-    this.setState({ currentOmrResult: result });
+    const studentName = this.state.students[this.state.activeStudentIndex] || "Siswa";
+    
+    // Automatically keep history in sync if this student was already in history
+    const existingIndex = this.state.history.findIndex(h => h.studentName === studentName);
+    let updatedHistory = [...this.state.history];
+
+    if (existingIndex >= 0) {
+      updatedHistory[existingIndex] = {
+        ...updatedHistory[existingIndex],
+        score: result.score,
+        correctCount: result.correctCount,
+        wrongCount: result.wrongCount,
+        answers: result.detectedAnswers,
+        date: new Date().toLocaleString('id-ID'),
+      };
+    }
+
+    this.setState({
+      currentOmrResult: result,
+      history: updatedHistory,
+    });
   }
 
   setLatestAiText(text) {
-    this.setState({ latestAiText: text, isAiLoading: false });
+    const studentName = this.state.students[this.state.activeStudentIndex] || "Siswa";
+    const existingIndex = this.state.history.findIndex(h => h.studentName === studentName);
+    let updatedHistory = [...this.state.history];
+
+    if (existingIndex >= 0) {
+      updatedHistory[existingIndex] = {
+        ...updatedHistory[existingIndex],
+        aiReport: text,
+      };
+    }
+
+    this.setState({
+      latestAiText: text,
+      isAiLoading: false,
+      history: updatedHistory,
+    });
   }
 
   updateHistoryItem(id, updatedFields) {
@@ -242,7 +297,25 @@ class Store {
       }
       return item;
     });
-    this.setState({ history: updated });
+
+    const currentStudentName = this.state.students[this.state.activeStudentIndex];
+    let updatedOmr = this.state.currentOmrResult;
+
+    // If the currently viewed student was the one edited, sync currentOmrResult immediately!
+    const editedItem = updated.find(item => item.id === id);
+    if (editedItem && editedItem.studentName === currentStudentName) {
+      updatedOmr = {
+        score: editedItem.score,
+        correctCount: editedItem.correctCount,
+        wrongCount: editedItem.wrongCount,
+        detectedAnswers: editedItem.answers || (this.state.currentOmrResult ? this.state.currentOmrResult.detectedAnswers : []),
+      };
+    }
+
+    this.setState({
+      history: updated,
+      currentOmrResult: updatedOmr,
+    });
   }
 
   deleteHistoryItem(id) {
