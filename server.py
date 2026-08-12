@@ -63,7 +63,7 @@ def process_native_omr(image_base64, keys, total_questions=25):
             area = cv2.contourArea(c)
             bx, by, bw, bh = cv2.boundingRect(c)
             ratio = bw / float(bh)
-            if area > 2000 and 0.4 < ratio < 3.0:
+            if area > 3000 and 0.5 < ratio < 2.5:
                 candidate_blocks.append((bx, by, bw, bh))
 
         candidate_blocks.sort(key=lambda r: r[1])

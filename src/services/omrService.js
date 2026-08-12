@@ -134,7 +134,7 @@ function runCalibratedOpenCv(imgElement, keys) {
     let area = cv.contourArea(cnt);
     let r = cv.boundingRect(cnt);
     let ratio = r.width / parseFloat(r.height);
-    if (area > 2000 && ratio > 0.4 && ratio < 3.0) {
+    if (area > 3000 && ratio > 0.5 && ratio < 2.5) {
       candidateBlocks.push(r);
     }
   }
