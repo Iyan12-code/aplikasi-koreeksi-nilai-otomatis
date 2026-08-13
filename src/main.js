@@ -526,8 +526,16 @@ window.app = {
         showToast("Analisis AI LLaMA 3.3 berhasil dibuat!", "success");
       } catch (err) {
         console.warn("Groq API fallback:", err);
-        report = generateLocalDiagnosticFallback(studentName, state.exam, omr, state.questionMaterials);
-        showToast("Menggunakan template diagnostik lokal.", "info");
+        report = generateLocalDiagnosticFallback(
+          studentName,
+          state.exam,
+          omr,
+          state.questionMaterials,
+          state.questionIndicators,
+          state.questionKDs,
+          state.questionLevels
+        );
+        showToast("Analisis diagnostik berbasis indikator berhasil dimuat.", "info");
       }
 
       store.setLatestAiText(report);
