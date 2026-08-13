@@ -298,7 +298,7 @@ window.app = {
   saveToHistory() {
     const state = store.getState();
     if (!state.currentOmrResult) {
-      showToast("Lakukan koreksi OMR terlebih dahulu!", "error");
+      showToast("Lakukan koreksi OMR lembar LJK terlebih dahulu!", "error");
       return;
     }
 
@@ -314,18 +314,50 @@ window.app = {
       wrongCount: state.currentOmrResult.wrongCount,
       date: new Date().toLocaleString('id-ID'),
       answers: state.currentOmrResult.detectedAnswers,
-      aiReport: state.latestAiText,
+      aiReport: state.latestAiText || '',
     };
 
     store.setState({ history: [historyItem, ...filteredHistory] });
-    showToast(`Nilai ${studentName} (${historyItem.score}/100) tersimpan ke daftar kelas!`, "success");
+    showToast(`Nilai & Laporan ${studentName} (${historyItem.score}/100) berhasil disimpan!`, "success");
+  },
 
-    // Advance to next student
+  saveAndNextStudent() {
+    const state = store.getState();
+    if (!state.currentOmrResult) {
+      showToast("Lakukan koreksi OMR lembar LJK terlebih dahulu!", "error");
+      return;
+    }
+
+    const studentName = state.students[state.activeStudentIndex] || "Siswa";
+    const filteredHistory = state.history.filter(h => h.studentName !== studentName);
+
+    const historyItem = {
+      id: Date.now(),
+      studentName: studentName,
+      subject: state.exam.subject,
+      score: state.currentOmrResult.score,
+      correctCount: state.currentOmrResult.correctCount,
+      wrongCount: state.currentOmrResult.wrongCount,
+      date: new Date().toLocaleString('id-ID'),
+      answers: state.currentOmrResult.detectedAnswers,
+      aiReport: state.latestAiText || '',
+    };
+
+    store.setState({ history: [historyItem, ...filteredHistory] });
+    showToast(`Nilai & Laporan ${studentName} disimpan!`, "success");
+
     if (state.activeStudentIndex < state.students.length - 1) {
-      setTimeout(() => {
-        store.setActiveStudentIndex(state.activeStudentIndex + 1);
-        showToast(`Beralih ke siswa berikutnya: ${state.students[state.activeStudentIndex + 1]}`, "info");
-      }, 800);
+      const nextIdx = state.activeStudentIndex + 1;
+      const nextStudentName = state.students[nextIdx];
+      store.setActiveStudentIndex(nextIdx);
+      this.resetLjkUploadUi();
+      store.setActiveTab('tab-omr');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast(`Silakan unggah lembar LJK untuk: ${nextStudentName}`, "info");
+    } else {
+      showToast("Seluruh siswa di kelas telah selesai dikoreksi!", "success");
+      store.setActiveTab('tab-history');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   },
 

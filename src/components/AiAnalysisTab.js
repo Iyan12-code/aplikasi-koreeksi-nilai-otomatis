@@ -60,10 +60,21 @@ export function renderAiAnalysisTab() {
           </div>
         `}
 
-        <div class="mt-6 flex justify-end">
-          <button class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all" onclick="window.app.goToTab('tab-history')">
-            Buka Riwayat & Ekspor Excel <i class="fa-solid fa-arrow-right"></i>
+        <div class="mt-6 pt-5 border-t border-white/10 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+          <button type="button" class="px-5 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-xl text-xs font-bold text-emerald-300 flex items-center justify-center gap-2 transition-all shadow-sm" onclick="window.app.saveToHistory()">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Nilai & Laporan ${currentStudentName}
           </button>
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            ${state.activeStudentIndex < state.students.length - 1 ? `
+              <button type="button" class="px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all" onclick="window.app.saveAndNextStudent()">
+                <i class="fa-solid fa-user-plus"></i> Simpan & Koreksi Siswa Berikutnya <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            ` : ''}
+            <button type="button" class="px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all" onclick="window.app.goToTab('tab-history')">
+              <span>Buka Riwayat & Ekspor Excel</span> <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
         </div>
       </div>
     </section>

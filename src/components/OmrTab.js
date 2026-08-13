@@ -256,12 +256,9 @@ export function renderOmrTab() {
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-5">
-              <button type="button" class="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-xl text-xs font-bold text-emerald-300 flex items-center justify-center gap-2 transition-all shadow-sm" onclick="window.app.saveToHistory()">
-                <i class="fa-solid fa-floppy-disk"></i> Simpan Nilai ${currentStudentName}
-              </button>
-              <button type="button" class="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all" onclick="window.app.goToTab('tab-analysis'); window.app.generateAIAnalysis();">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Analisis AI <i class="fa-solid fa-arrow-right"></i>
+            <div class="flex justify-end items-center gap-3 mt-5">
+              <button type="button" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all" onclick="window.app.goToTab('tab-analysis'); window.app.generateAIAnalysis();">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Lanjut ke Analisis AI (${currentStudentName}) <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
           ` : `
