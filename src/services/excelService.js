@@ -60,7 +60,7 @@ export async function parseStudentsFromExcel(file) {
 
 /**
  * Membaca Dokumen Kisi-Kisi Ujian (Excel .xlsx / .xls)
- * Mengekstrak No Soal (PG 1-25), Materi Pokok, Indikator Soal, KD, Level Kognitif, dan Kunci Jawaban
+ * Fleksibel terhadap berbagai tata letak kolom, nama header, dan sel merged
  */
 export async function parseKisiKisiFromExcel(file) {
   return new Promise((resolve, reject) => {
@@ -69,7 +69,17 @@ export async function parseKisiKisiFromExcel(file) {
       try {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        // Cari sheet yang paling relevan (prioritaskan sheet bernama 'kisi' jika ada)
+        let targetSheetName = workbook.SheetNames[0];
+        for (const name of workbook.SheetNames) {
+          if (name.toLowerCase().includes('kisi') || name.toLowerCase().includes('soal')) {
+            targetSheetName = name;
+            break;
+          }
+        }
+
+        const worksheet = workbook.Sheets[targetSheetName];
         const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
         let noCol = -1;
@@ -79,33 +89,113 @@ export async function parseKisiKisiFromExcel(file) {
         let levelCol = -1;
         let bentukCol = -1;
         let kunciCol = -1;
-        let startRow = -1;
+        let headerRowIdx = -1;
 
-        // Cari header kolom
-        for (let r = 0; r < Math.min(jsonRows.length, 12); r++) {
+        // 1. FUZZY SEMANTIC HEADER MATCHING
+        for (let r = 0; r < Math.min(jsonRows.length, 20); r++) {
           const row = jsonRows[r];
-          if (!row) continue;
+          if (!row || row.length === 0) continue;
+
+          let matchesInThisRow = 0;
+
           for (let c = 0; c < row.length; c++) {
             const val = String(row[c] || '').trim().toLowerCase();
-            if (val.includes('nomor') || val.includes('no butir') || val === 'no' || val.includes('nom')) {
-              noCol = c;
-              startRow = r + 1;
+            if (!val) continue;
+
+            // Nomor Soal
+            if (val.includes('no butir') || val.includes('nomor butir') || val.includes('no. butir') ||
+                val.includes('no soal') || val.includes('nomor soal') || val.includes('no. soal') ||
+                val.includes('no urut') || val === 'no' || val === 'nomor' || val === 'nom') {
+              if (noCol === -1 || val.includes('soal') || val.includes('butir')) {
+                noCol = c;
+                matchesInThisRow++;
+              }
             }
-            if (val.includes('materi')) materiCol = c;
-            if (val.includes('indikator')) indikatorCol = c;
-            if (val.includes('kompetensi') || val.includes('kd')) kdCol = c;
-            if (val.includes('level') || val.includes('kognitif')) levelCol = c;
-            if (val.includes('bentuk')) bentukCol = c;
-            if (val.includes('kunci')) kunciCol = c;
+
+            // Materi Pokok
+            if (val.includes('materi') || val.includes('lingkup materi') || val.includes('topik') ||
+                val.includes('bahan kajian') || val.includes('pokok bahasan') || val.includes('sub materi')) {
+              materiCol = c;
+              matchesInThisRow++;
+            }
+
+            // Indikator Soal
+            if (val.includes('indikator') || val.includes('iktp') || val.includes('kriteria') ||
+                val.includes('tujuan pembelajaran') || val.includes('deskripsi soal') || val.includes('indikator soal')) {
+              indikatorCol = c;
+              matchesInThisRow++;
+            }
+
+            // Kompetensi Dasar (KD) / Capaian Pembelajaran (CP)
+            if (val.includes('kompetensi') || val.includes('kd') || val.includes('capaian') ||
+                val.includes('cp') || val.includes('elemen')) {
+              kdCol = c;
+              matchesInThisRow++;
+            }
+
+            // Level Kognitif
+            if (val.includes('level') || val.includes('kognitif') || val.includes('ranah') ||
+                val.includes('taksonomi') || val.includes('l1') || val.includes('c1')) {
+              levelCol = c;
+              matchesInThisRow++;
+            }
+
+            // Bentuk Soal
+            if (val.includes('bentuk') || val.includes('tipe') || val.includes('jenis')) {
+              bentukCol = c;
+              matchesInThisRow++;
+            }
+
+            // Kunci Jawaban
+            if (val.includes('kunci') || val.includes('jawaban') || val.includes('opsi') || val.includes('key')) {
+              kunciCol = c;
+              matchesInThisRow++;
+            }
           }
-          if (materiCol !== -1 && (noCol !== -1 || indikatorCol !== -1)) break;
+
+          if (matchesInThisRow >= 2 && headerRowIdx === -1) {
+            headerRowIdx = r;
+          }
         }
 
-        // Fallback default kolom jika format standar tabel
-        if (noCol === -1) noCol = 7; // atau kolom terakhir
-        if (materiCol === -1) materiCol = 2;
-        if (indikatorCol === -1) indikatorCol = 5;
-        if (startRow === -1) startRow = 1;
+        const startRow = (headerRowIdx !== -1) ? headerRowIdx + 1 : 1;
+
+        // 2. HEURISTIC CONTENT-BASED ANALYZER (Jika ada kolom yang belum terdeteksi)
+        if (noCol === -1 || materiCol === -1 || indikatorCol === -1) {
+          const colStats = {};
+
+          for (let r = startRow; r < Math.min(jsonRows.length, startRow + 25); r++) {
+            const row = jsonRows[r];
+            if (!row) continue;
+            for (let c = 0; c < row.length; c++) {
+              const cell = String(row[c] || '').trim();
+              if (!cell) continue;
+
+              if (!colStats[c]) colStats[c] = { numbers: 0, longText: 0, mediumText: 0, levels: 0, keys: 0, total: 0 };
+              colStats[c].total++;
+
+              if (cell.match(/^\d+$/) && parseInt(cell) >= 1 && parseInt(cell) <= 50) colStats[c].numbers++;
+              if (['A', 'B', 'C', 'D'].includes(cell.toUpperCase())) colStats[c].keys++;
+              if (['L1', 'L2', 'L3', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6'].includes(cell.toUpperCase())) colStats[c].levels++;
+              if (cell.length > 30 || cell.toLowerCase().includes('disajikan') || cell.toLowerCase().includes('peserta didik')) colStats[c].longText++;
+              if (cell.length >= 8 && cell.length <= 40) colStats[c].mediumText++;
+            }
+          }
+
+          for (const [colStr, stat] of Object.entries(colStats)) {
+            const col = parseInt(colStr);
+            if (noCol === -1 && stat.numbers >= 3) noCol = col;
+            if (kunciCol === -1 && stat.keys >= 3) kunciCol = col;
+            if (levelCol === -1 && stat.levels >= 3) levelCol = col;
+            if (indikatorCol === -1 && stat.longText >= 2) indikatorCol = col;
+            if (materiCol === -1 && stat.mediumText >= 2 && col !== indikatorCol && col !== kdCol) materiCol = col;
+          }
+        }
+
+        // Fallbacks akhir jika file sangat ringkas
+        if (noCol === -1) noCol = 0;
+        if (materiCol === -1) materiCol = Math.min(1, jsonRows[0] ? jsonRows[0].length - 1 : 1);
+        if (indikatorCol === -1) indikatorCol = materiCol;
 
         const parsedData = {
           materials: Array(25).fill(''),
@@ -138,19 +228,23 @@ export async function parseKisiKisiFromExcel(file) {
             if (numMatch) qNum = parseInt(numMatch[0]);
           }
 
-          // Jika tidak ada nomor eksplisit, gunakan nomor urut
+          // Fallback cek nomor di kolom lain
           if (!qNum || qNum < 1 || qNum > 25) {
-            // Cek apakah ada nomor di kolom pertama
-            const col0Match = String(row[0] || '').match(/\d+/);
-            if (col0Match && parseInt(col0Match[0]) <= 25) {
-              qNum = parseInt(col0Match[0]);
+            for (let c = 0; c < row.length; c++) {
+              if (c !== materiCol && c !== indikatorCol && row[c]) {
+                const match = String(row[c]).match(/^\d+$/);
+                if (match && parseInt(match[0]) >= 1 && parseInt(match[0]) <= 25) {
+                  qNum = parseInt(match[0]);
+                  break;
+                }
+              }
             }
           }
 
           if (!qNum || qNum < 1 || qNum > 25) continue;
           const qIdx = qNum - 1;
 
-          // KD & Materi (dengan inheritance jika merged cell)
+          // KD & Materi (dengan inheritance otomatis jika merged cell)
           if (kdCol !== -1 && row[kdCol]) lastKd = String(row[kdCol]).trim();
           if (materiCol !== -1 && row[materiCol]) lastMateri = String(row[materiCol]).trim();
 
@@ -158,7 +252,7 @@ export async function parseKisiKisiFromExcel(file) {
           const level = (levelCol !== -1 && row[levelCol]) ? String(row[levelCol]).trim() : 'L1';
           const kunci = (kunciCol !== -1 && row[kunciCol]) ? String(row[kunciCol]).trim().toUpperCase() : '';
 
-          parsedData.materials[qIdx] = lastMateri || `Materi Soal ${qNum}`;
+          parsedData.materials[qIdx] = lastMateri || (indikator ? indikator.substring(0, 30) : `Materi Soal ${qNum}`);
           parsedData.indicators[qIdx] = indikator || lastMateri || `Indikator Pembelajaran Soal ${qNum}`;
           parsedData.kds[qIdx] = lastKd;
           parsedData.levels[qIdx] = level || 'L1';
@@ -167,6 +261,23 @@ export async function parseKisiKisiFromExcel(file) {
           }
 
           parsedData.count++;
+        }
+
+        // Jika count masih 0 tetapi baris ada, lakukan pembacaan sequential 1-25
+        if (parsedData.count === 0 && jsonRows.length > startRow) {
+          let seqNum = 1;
+          for (let r = startRow; r < jsonRows.length && seqNum <= 25; r++) {
+            const row = jsonRows[r];
+            if (!row || row.length === 0) continue;
+            const qIdx = seqNum - 1;
+            const text = row.join(' ').trim();
+            if (text.length > 5) {
+              parsedData.materials[qIdx] = String(row[materiCol] || `Materi Soal ${seqNum}`).trim();
+              parsedData.indicators[qIdx] = String(row[indikatorCol] || parsedData.materials[qIdx]).trim();
+              parsedData.count++;
+              seqNum++;
+            }
+          }
         }
 
         resolve(parsedData);
