@@ -22,7 +22,7 @@ import { renderOnboardingSplash } from './components/OnboardingSplash.js';
 
 import { processOmrImage } from './services/omrService.js';
 import { buildDiagnosticPrompt, callGroqAi, generateLocalDiagnosticFallback } from './services/aiService.js';
-import { parseStudentsFromExcel, exportFullExcelReport } from './services/excelService.js';
+import { parseStudentsFromExcel, parseKisiKisiFromExcel, downloadKisiKisiTemplate, exportFullExcelReport } from './services/excelService.js';
 
 // Global App Object for inline template handlers & CRUD & Auth & Profile
 window.app = {
@@ -235,6 +235,20 @@ window.app = {
       store.setAnswerKeys(Array(totalQ).fill(mode));
       showToast(`Seluruh ${totalQ} kunci jawaban diatur ke opsi ${mode}`, "info");
     }
+  },
+
+  downloadKisiKisiTemplate() {
+    try {
+      downloadKisiKisiTemplate();
+      showToast("Template Dokumen Kisi-Kisi Excel (.xlsx) berhasil diunduh!", "success");
+    } catch (e) {
+      showToast("Gagal mengunduh template: " + e.message, "error");
+    }
+  },
+
+  applyIpsKisiKisiPreset() {
+    store.applyOfficialIpsPreset();
+    showToast("Kisi-kisi Resmi IPS (ASS-SD) 25 Soal & Indikator berhasil diterapkan!", "success");
   },
 
   resetLjkUploadUi() {
@@ -495,7 +509,15 @@ window.app = {
     store.setAiLoading(true);
 
     try {
-      const prompt = buildDiagnosticPrompt(state.exam, studentName, omr, state.questionMaterials);
+      const prompt = buildDiagnosticPrompt(
+        state.exam,
+        studentName,
+        omr,
+        state.questionMaterials,
+        state.questionIndicators,
+        state.questionKDs,
+        state.questionLevels
+      );
       let report = "";
 
       try {
@@ -654,11 +676,42 @@ function bindEvents() {
     }
   });
 
-  // Individual Question Material Inputs
+  // Kisi-Kisi Upload
+  const kisiKisiDropzone = document.getElementById('kisiKisiDropzone');
+  const kisiKisiFileInput = document.getElementById('kisiKisiFileInput');
+  const kisiKisiStatusBadge = document.getElementById('kisiKisiStatusBadge');
+
+  kisiKisiDropzone?.addEventListener('click', () => kisiKisiFileInput?.click());
+  kisiKisiFileInput?.addEventListener('change', async (e) => {
+    if (e.target.files.length > 0) {
+      const file = e.target.files[0];
+      try {
+        const parsed = await parseKisiKisiFromExcel(file);
+        if (parsed && parsed.count > 0) {
+          store.setKisiKisiData(parsed);
+          if (kisiKisiStatusBadge) kisiKisiStatusBadge.innerText = `${parsed.count} Indikator Terhubung`;
+          showToast(`Dokumen Kisi-Kisi Berhasil Dibaca! ${parsed.count} butir soal, KD, dan indikator terhubung ke AI.`, "success");
+        } else {
+          showToast("Format kisi-kisi tidak terdeteksi. Gunakan format template atau tombol Preset.", "error");
+        }
+      } catch (err) {
+        showToast("Gagal membaca file kisi-kisi: " + err.message, "error");
+      }
+    }
+  });
+
+  // Individual Question Material & Indicator Inputs
   document.querySelectorAll('.q-material-input').forEach(input => {
     input.addEventListener('input', (e) => {
       const qIdx = parseInt(input.getAttribute('data-qindex'));
       store.setQuestionMaterial(qIdx, e.target.value);
+    });
+  });
+
+  document.querySelectorAll('.q-indicator-input').forEach(input => {
+    input.addEventListener('input', (e) => {
+      const qIdx = parseInt(input.getAttribute('data-qindex'));
+      store.setQuestionIndicator(qIdx, e.target.value);
     });
   });
 

@@ -59,6 +59,152 @@ export async function parseStudentsFromExcel(file) {
 }
 
 /**
+ * Membaca Dokumen Kisi-Kisi Ujian (Excel .xlsx / .xls)
+ * Mengekstrak No Soal (PG 1-25), Materi Pokok, Indikator Soal, KD, Level Kognitif, dan Kunci Jawaban
+ */
+export async function parseKisiKisiFromExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        let noCol = -1;
+        let materiCol = -1;
+        let indikatorCol = -1;
+        let kdCol = -1;
+        let levelCol = -1;
+        let bentukCol = -1;
+        let kunciCol = -1;
+        let startRow = -1;
+
+        // Cari header kolom
+        for (let r = 0; r < Math.min(jsonRows.length, 12); r++) {
+          const row = jsonRows[r];
+          if (!row) continue;
+          for (let c = 0; c < row.length; c++) {
+            const val = String(row[c] || '').trim().toLowerCase();
+            if (val.includes('nomor') || val.includes('no butir') || val === 'no' || val.includes('nom')) {
+              noCol = c;
+              startRow = r + 1;
+            }
+            if (val.includes('materi')) materiCol = c;
+            if (val.includes('indikator')) indikatorCol = c;
+            if (val.includes('kompetensi') || val.includes('kd')) kdCol = c;
+            if (val.includes('level') || val.includes('kognitif')) levelCol = c;
+            if (val.includes('bentuk')) bentukCol = c;
+            if (val.includes('kunci')) kunciCol = c;
+          }
+          if (materiCol !== -1 && (noCol !== -1 || indikatorCol !== -1)) break;
+        }
+
+        // Fallback default kolom jika format standar tabel
+        if (noCol === -1) noCol = 7; // atau kolom terakhir
+        if (materiCol === -1) materiCol = 2;
+        if (indikatorCol === -1) indikatorCol = 5;
+        if (startRow === -1) startRow = 1;
+
+        const parsedData = {
+          materials: Array(25).fill(''),
+          indicators: Array(25).fill(''),
+          kds: Array(25).fill(''),
+          levels: Array(25).fill('L1'),
+          keys: Array(25).fill('A'),
+          count: 0,
+        };
+
+        let lastKd = '';
+        let lastMateri = '';
+
+        for (let r = startRow; r < jsonRows.length; r++) {
+          const row = jsonRows[r];
+          if (!row || row.length === 0) continue;
+
+          // Cek bentuk soal jika ada (prioritas PG)
+          if (bentukCol !== -1 && row[bentukCol]) {
+            const bentukStr = String(row[bentukCol]).trim().toUpperCase();
+            if (bentukStr && !bentukStr.includes('PG') && !bentukStr.includes('PILIHAN') && !bentukStr.includes('GANDA')) {
+              continue; // Lewati isian/uraian
+            }
+          }
+
+          // Baca nomor soal
+          let qNum = null;
+          if (noCol !== -1 && row[noCol] !== undefined) {
+            const numMatch = String(row[noCol]).match(/\d+/);
+            if (numMatch) qNum = parseInt(numMatch[0]);
+          }
+
+          // Jika tidak ada nomor eksplisit, gunakan nomor urut
+          if (!qNum || qNum < 1 || qNum > 25) {
+            // Cek apakah ada nomor di kolom pertama
+            const col0Match = String(row[0] || '').match(/\d+/);
+            if (col0Match && parseInt(col0Match[0]) <= 25) {
+              qNum = parseInt(col0Match[0]);
+            }
+          }
+
+          if (!qNum || qNum < 1 || qNum > 25) continue;
+          const qIdx = qNum - 1;
+
+          // KD & Materi (dengan inheritance jika merged cell)
+          if (kdCol !== -1 && row[kdCol]) lastKd = String(row[kdCol]).trim();
+          if (materiCol !== -1 && row[materiCol]) lastMateri = String(row[materiCol]).trim();
+
+          const indikator = (indikatorCol !== -1 && row[indikatorCol]) ? String(row[indikatorCol]).trim() : '';
+          const level = (levelCol !== -1 && row[levelCol]) ? String(row[levelCol]).trim() : 'L1';
+          const kunci = (kunciCol !== -1 && row[kunciCol]) ? String(row[kunciCol]).trim().toUpperCase() : '';
+
+          parsedData.materials[qIdx] = lastMateri || `Materi Soal ${qNum}`;
+          parsedData.indicators[qIdx] = indikator || lastMateri || `Indikator Pembelajaran Soal ${qNum}`;
+          parsedData.kds[qIdx] = lastKd;
+          parsedData.levels[qIdx] = level || 'L1';
+          if (kunci && ['A', 'B', 'C', 'D'].includes(kunci)) {
+            parsedData.keys[qIdx] = kunci;
+          }
+
+          parsedData.count++;
+        }
+
+        resolve(parsedData);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+/**
+ * Mengunduh Template Dokumen Kisi-Kisi Excel (.xlsx) Resmi
+ */
+export function downloadKisiKisiTemplate() {
+  const headers = [
+    ["KISI-KISI PENULISAN ASESMEN SUMATIF (25 BUTIR SOAL PILIHAN GANDA)"],
+    ["Tahun Ajaran 2025/2026"],
+    [],
+    ["NO", "KOMPETENSI DASAR (KD)", "MATERI POKOK", "KELAS/SMT", "LEVEL", "INDIKATOR SOAL", "BENTUK", "NOMOR SOAL", "KUNCI"]
+  ];
+
+  const sampleRows = [
+    [1, "3.1 Mengidentifikasi karakteristik geografis Indonesia", "Letak geografis", "VI/1", "L1", "Disajikan tabel, peserta didik dapat menentukan kondisi geografis negara Indonesia", "PG", 1, "A"],
+    [2, "3.1 Mengidentifikasi karakteristik geografis Indonesia", "Letak geografis Indonesia", "VI/1", "L1", "Disajikan gambar, peserta didik dapat mengidentifikasi asal suku bangsa", "PG", 2, "B"],
+    [3, "3.1 Mengidentifikasi karakteristik geografis Indonesia", "Letak geografis Indonesia", "VI/1", "L2", "Disajikan peta Indonesia, peserta didik dapat mengidentifikasi letak geografis", "PG", 3, "C"],
+    [4, "3.1 Mengidentifikasi karakteristik geografis Indonesia", "Manfaat letak strategis Indonesia", "VI/1", "L2", "Disajikan pernyataan, peserta didik mampu mengidentifikasi manfaat letak strategis", "PG", 4, "C"],
+    [5, "3.1 Mengidentifikasi karakteristik geografis Indonesia", "Persebaran fauna di Indonesia", "VI/1", "L1", "Disajikan gambar hewan, peserta didik dapat menentukan habitat fauna", "PG", 5, "C"]
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet([...headers, ...sampleRows]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Kisi-Kisi Asesmen");
+  XLSX.writeFile(wb, "Template_Kisi_Kisi_Asesmen_25_Soal.xlsx");
+}
+
+/**
  * Export full official ASKA template with dynamic N Pilihan Ganda columns & colors
  */
 export function exportFullExcelReport(historyList, examData, latestAiText, stateStudents = [], answerKeys = []) {

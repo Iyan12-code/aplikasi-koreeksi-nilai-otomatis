@@ -5,7 +5,7 @@
  * =========================================================
  */
 
-export function buildDiagnosticPrompt(exam, studentName, omrResult, questionMaterials) {
+export function buildDiagnosticPrompt(exam, studentName, omrResult, questionMaterials = [], questionIndicators = [], questionKDs = [], questionLevels = []) {
   const { subject, kkm, totalQuestions = 25 } = exam;
   const { score, correctCount, wrongCount, detectedAnswers } = omrResult;
 
@@ -17,17 +17,27 @@ export function buildDiagnosticPrompt(exam, studentName, omrResult, questionMate
   if (detectedAnswers) {
     for (let i = 0; i < effectiveTotal; i++) {
       const a = detectedAnswers[i];
-      const mat = (questionMaterials && questionMaterials[i]) ? questionMaterials[i] : `Indikator Soal ${i + 1}`;
+      const mat = (questionMaterials && questionMaterials[i]) ? questionMaterials[i] : `Materi Soal ${i + 1}`;
+      const ind = (questionIndicators && questionIndicators[i]) ? questionIndicators[i] : mat;
+      const kd = (questionKDs && questionKDs[i]) ? questionKDs[i] : '';
+      const lvl = (questionLevels && questionLevels[i]) ? questionLevels[i] : 'L1';
+
       if (a.isCorrect) {
         correctQuestions.push(`Soal ${a.questionNumber} (Materi: ${mat})`);
       } else {
-        wrongQuestions.push(`Soal ${a.questionNumber} [Kunci: ${a.correctAnswer}, Jawaban Siswa: ${a.studentAnswer}] -> Indikator Materi: ${mat}`);
+        wrongQuestions.push(
+          `Soal ${a.questionNumber} [Kunci: ${a.correctAnswer}, Jawaban Siswa: ${a.studentAnswer}]` +
+          `\n    - KD: ${kd || '-'}` +
+          `\n    - Materi Pokok: ${mat}` +
+          `\n    - Level Kognitif: ${lvl}` +
+          `\n    - Indikator Soal: "${ind}"`
+        );
       }
     }
   }
 
   return `
-Anda adalah seorang Dosen dan Pakar Evaluasi Pembelajaran Kurikulum Nasional. Berikan analisis diagnostik profesional, objektif, berbasis data, dan terstruktur untuk siswa berikut:
+Anda adalah seorang Dosen dan Pakar Evaluasi Pembelajaran Kurikulum Nasional. Berikan analisis diagnostik profesional, objektif, berbasis data, dan terstruktur untuk siswa berikut berdasarkan Dokumen Kisi-Kisi Soal:
 
 --- DATA ASESMEN SISWA ---
 * Nama Siswa: ${studentName}
@@ -36,8 +46,8 @@ Anda adalah seorang Dosen dan Pakar Evaluasi Pembelajaran Kurikulum Nasional. Be
 * Nilai Akhir: ${score} / 100 (KKM: ${kkm}) -> Status: ${score >= kkm ? 'TUNTAS' : 'BELUM TUNTAS / REMEDIAL'}
 * Jawaban Benar: ${correctCount} butir
 * Jawaban Salah: ${wrongCount} butir
-* Rincian Butir Soal Salah beserta Indikator Kisi-kisinya:
-${wrongQuestions.length > 0 ? wrongQuestions.map(w => '  - ' + w).join('\n') : '  - Tidak ada kesalahan (Sempurna)'}
+* Rincian Butir Soal Salah Berdasarkan Dokumen Kisi-Kisi & Indikator:
+${wrongQuestions.length > 0 ? wrongQuestions.join('\n\n') : '  - Tidak ada kesalahan (Sempurna - 100% Penguasaan)'}
 
 --- PETUNJUK PENYUSUNAN LAPORAN (6 STRUKTUR BAKU) ---
 Tulis laporan dalam format Markdown yang rapi dengan heading yang jelas:
@@ -46,10 +56,10 @@ Tulis laporan dalam format Markdown yang rapi dengan heading yang jelas:
 Bandingkan capaian skor (${score}) terhadap KKM (${kkm}) secara ringkas dan lugas.
 
 ### 2. Analisis Kesalahan Berdasarkan Indikator & Butir Soal
-Bedah secara spesifik nomor-nomor soal yang dijawab salah oleh siswa di atas beserta nama indikator pembelajarannya. Analisis kemungkinan miskonsepsi atau kelemahan konsep spesifik yang dialami siswa.
+Bedah secara spesifik nomor-nomor soal yang dijawab salah oleh siswa di atas beserta nama materi pokok, ranah level kognitif (L1/L2/L3), dan deskripsi indikator soalnya. Analisis kemungkinan miskonsepsi atau kelemahan konsep spesifik yang dialami siswa.
 
 ### 3. Rekomendasi Spesifik Berdasarkan Indikator Materi
-Uraikan langkah perbaikan materi yang harus difokuskan oleh siswa pada topik-topik yang belum dikuasai.
+Uraikan langkah perbaikan materi yang harus difokuskan oleh siswa pada indikator-indikator yang belum tercapai.
 
 ### 4. Rekomendasi Strategi Pembelajaran Untuk Guru di Kelas
 Berikan masukan pedagogik konkret bagi guru dalam membimbing siswa tersebut di kelas (misal: scaffolding, media visual, latihan bertingkat).
