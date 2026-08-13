@@ -18,7 +18,7 @@ export function renderExamTab() {
           <i class="fa-solid fa-layer-group"></i> Langkah 1 dari 5
         </div>
         <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Input Data Siswa</h2>
-        <p class="text-sm text-slate-400 mt-1">Tentukan mata pelajaran, standar KKM, jumlah butir soal, dan unggah daftar nama siswa.</p>
+        <p class="text-sm text-slate-400 mt-1">Tentukan mata pelajaran, standar KKM (25 Butir Soal), dan unggah daftar nama siswa.</p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
@@ -54,24 +54,8 @@ export function renderExamTab() {
                 </div>
               </div>
 
-              <!-- Jumlah Butir Soal & KKM -->
+              <!-- Nilai KKM & Format Lembar Jawaban (Fixed 25 Soal) -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                <!-- Jumlah Butir Soal -->
-                <div>
-                  <label for="examTotalQuestions" class="block text-xs font-bold text-slate-300 mb-2">
-                    Jumlah Butir Soal (PG)
-                  </label>
-                  <input type="number" id="examTotalQuestions" value="${totalQ}" min="1" max="100" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-white font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
-                  
-                  <div class="grid grid-cols-3 gap-1.5 mt-2.5">
-                    ${[10, 20, 25, 30, 40, 50].map(count => `
-                      <button type="button" class="btn-q-chip text-center border ${totalQ === count ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-indigo-400 shadow-sm' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'}" data-count="${count}">
-                        ${count} Soal
-                      </button>
-                    `).join('')}
-                  </div>
-                </div>
-
                 <!-- Nilai KKM -->
                 <div>
                   <label for="examKkm" class="block text-xs font-bold text-slate-300 mb-2">Nilai KKM (Ketuntasan)</label>
@@ -79,6 +63,23 @@ export function renderExamTab() {
                   <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 mt-2.5">
                     <span class="text-[11px] text-slate-400 block leading-snug">
                       Standar kelulusan: Nilai <strong class="text-emerald-400">≥ ${state.exam.kkm}</strong> dinyatakan <strong>TUNTAS</strong>, di bawahnya <strong>REMEDIAL</strong>.
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Format Lembar Jawaban (25 Butir Soal Tetap) -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 mb-2">Format Lembar Jawaban</label>
+                  <div class="w-full bg-indigo-500/10 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <i class="fa-solid fa-file-circle-check text-indigo-400 text-sm"></i>
+                      <span class="text-xs font-extrabold text-indigo-300">25 Butir Soal (PG)</span>
+                    </div>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">Standar 5 Kolom</span>
+                  </div>
+                  <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 mt-2.5">
+                    <span class="text-[11px] text-slate-400 block leading-snug">
+                      Terkalibrasi otomatis untuk lembar LJK 25 nomor (5 kolom × 5 baris).
                     </span>
                   </div>
                 </div>

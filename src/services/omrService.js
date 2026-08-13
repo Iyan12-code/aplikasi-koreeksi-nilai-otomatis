@@ -1,8 +1,5 @@
 /**
- * ============================================================================
- * CLASS OMRProcessor (100% PURE JAVASCRIPT & COMPUTER VISION ENGINE)
- * ============================================================================
- * Melokalisasi grid jawaban dan mendeteksi bulatan jawaban OMR
+ * Melokalisasi grid jawaban dan mendeteksi kotak jawaban OMR
  * menggunakan teknik computer vision murni sesuai kode sumber Java Android (OMRProcessor.java).
  * Dilengkapi High-Speed Two-Pass Connected Components untuk akurasi 100% di browser.
  */

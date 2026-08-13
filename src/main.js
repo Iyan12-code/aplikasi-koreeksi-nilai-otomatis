@@ -582,15 +582,9 @@ function bindEvents() {
   // Tab 1 Inputs
   const examSubjectInput = document.getElementById('examSubject');
   const examKkmInput = document.getElementById('examKkm');
-  const examTotalQuestionsInput = document.getElementById('examTotalQuestions');
 
   examSubjectInput?.addEventListener('input', (e) => store.setSubject(e.target.value));
   examKkmInput?.addEventListener('input', (e) => store.setKkm(e.target.value));
-  examTotalQuestionsInput?.addEventListener('change', (e) => {
-    const val = parseInt(e.target.value) || 25;
-    store.setTotalQuestions(val);
-    showToast(`Jumlah butir soal diatur: ${val} Soal`, "info");
-  });
 
   document.querySelectorAll('.btn-chip').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -598,16 +592,6 @@ function bindEvents() {
       if (sub) {
         store.setSubject(sub);
         showToast(`Mata pelajaran diatur: ${sub}`, "success");
-      }
-    });
-  });
-
-  document.querySelectorAll('.btn-q-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const count = parseInt(btn.getAttribute('data-count'));
-      if (count) {
-        store.setTotalQuestions(count);
-        showToast(`Jumlah butir soal diatur ke ${count} Soal`, "success");
       }
     });
   });
