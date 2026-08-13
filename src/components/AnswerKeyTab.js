@@ -121,7 +121,7 @@ export function renderAnswerKeyTab() {
             const currentLvl = state.questionLevels[idx] || 'L1';
 
             return `
-              <div class="bg-slate-950/70 border border-white/10 hover:border-indigo-500/40 rounded-xl p-3.5 flex flex-col justify-between transition-all group">
+              <div class="bg-slate-950/70 border border-white/10 hover:border-indigo-500/40 rounded-xl p-3.5 flex flex-col justify-between transition-all group shadow-sm">
                 <div>
                   <!-- Header: Nomor Soal + Level + Kunci Options -->
                   <div class="flex justify-between items-center mb-2.5">
@@ -132,7 +132,6 @@ export function renderAnswerKeyTab() {
                       <span class="text-[10px] px-1.5 py-0.5 rounded font-bold ${currentLvl === 'L3' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : (currentLvl === 'L2' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30')}">
                         ${currentLvl}
                       </span>
-                      ${currentKd ? `<span class="text-[9px] text-slate-400 truncate max-w-[90px]" title="${currentKd}">${currentKd}</span>` : ''}
                     </div>
 
                     <!-- Kunci Jawaban Toggle (A/B/C/D) -->
@@ -145,11 +144,18 @@ export function renderAnswerKeyTab() {
                     </div>
                   </div>
 
-                  <!-- Materi Pokok (Otomatis) -->
-                  <div class="mb-2">
-                    <span class="text-[10px] font-bold text-indigo-300 uppercase tracking-wider block">Materi Pokok:</span>
-                    <p class="text-xs font-bold text-white mt-0.5 leading-snug">${currentMat}</p>
-                  </div>
+                  <!-- Tujuan Pembelajaran / KD (Otomatis) -->
+                  ${currentKd ? `
+                    <div class="mb-2 p-1.5 rounded-md bg-indigo-500/5 border border-indigo-500/15">
+                      <span class="text-[9px] font-bold text-indigo-300 uppercase tracking-wider block">Tujuan Pembelajaran / KD:</span>
+                      <p class="text-[11px] font-semibold text-slate-200 mt-0.5 leading-snug line-clamp-2" title="${currentKd}">${currentKd}</p>
+                    </div>
+                  ` : `
+                    <div class="mb-2">
+                      <span class="text-[10px] font-bold text-indigo-300 uppercase tracking-wider block">Materi Pokok:</span>
+                      <p class="text-xs font-bold text-white mt-0.5 leading-snug">${currentMat}</p>
+                    </div>
+                  `}
 
                   <!-- Indikator Pembelajaran (Otomatis) -->
                   <div class="p-2 rounded-lg bg-white/[0.02] border border-white/5">
