@@ -39,33 +39,23 @@ export function renderExamTab() {
                 <input type="text" id="examSubject" value="${state.exam.subject}" placeholder="cth. Bahasa Indonesia Kelas VI" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
               </div>
 
-              <!-- Nilai KKM & Format Lembar Jawaban (Fixed 25 Soal) -->
+              <!-- Nilai KKM & Format Lembar Jawaban (Maksimal 25 Soal) -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 <!-- Nilai KKM -->
                 <div>
                   <label for="examKkm" class="block text-xs font-bold text-slate-300 mb-2">Nilai KKM (Ketuntasan)</label>
-                  <input type="number" id="examKkm" value="${state.exam.kkm}" min="0" max="100" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-white font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
-                  <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 mt-2.5">
-                    <span class="text-[11px] text-slate-400 block leading-snug">
-                      Standar kelulusan: Nilai <strong class="text-emerald-400">≥ ${state.exam.kkm}</strong> dinyatakan <strong>TUNTAS</strong>, di bawahnya <strong>REMEDIAL</strong>.
-                    </span>
-                  </div>
+                  <input type="number" id="examKkm" value="${state.exam.kkm}" min="0" max="100" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-xs text-white font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
                 </div>
 
-                <!-- Format Lembar Jawaban (25 Butir Soal Tetap) -->
+                <!-- Format Lembar Jawaban -->
                 <div>
                   <label class="block text-xs font-bold text-slate-300 mb-2">Format Lembar Jawaban</label>
-                  <div class="w-full bg-indigo-500/10 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
+                  <div class="w-full bg-slate-950/80 border border-white/10 rounded-xl px-4 py-2.5 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                       <i class="fa-solid fa-file-circle-check text-indigo-400 text-sm"></i>
-                      <span class="text-xs font-extrabold text-indigo-300">25 Butir Soal (PG)</span>
+                      <span class="text-xs font-bold text-slate-200">Maksimal 25 Soal (PG)</span>
                     </div>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">Maksimal 25 Soal</span>
-                  </div>
-                  <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 mt-2.5">
-                    <span class="text-[11px] text-slate-400 block leading-snug">
-                      Terkalibrasi otomatis untuk lembar LJK 25 nomor (5 kolom × 5 baris).
-                    </span>
+                    <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/30">5 Kolom</span>
                   </div>
                 </div>
               </div>
