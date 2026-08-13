@@ -36,10 +36,10 @@ export function renderAnswerKeyTab() {
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm font-bold">
-                  <i class="fa-solid fa-file-excel"></i>
+                  <i class="fa-solid fa-file-word text-blue-400"></i>
                 </div>
                 <div>
-                  <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">Unggah Dokumen Kisi-Kisi (.xlsx)</h3>
+                  <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">Unggah Dokumen Kisi-Kisi (Word .docx / Excel .xlsx)</h3>
                   <span class="text-[11px] text-slate-400">Ekstraksi otomatis 25 materi & indikator untuk analisis AI</span>
                 </div>
               </div>
@@ -55,11 +55,11 @@ export function renderAnswerKeyTab() {
                   <i class="fa-solid fa-cloud-arrow-up"></i>
                 </div>
                 <div class="text-left">
-                  <span class="text-sm font-bold text-white block">Klik atau Tarik Dokumen Kisi-Kisi Anda ke Sini</span>
-                  <span class="text-xs text-slate-400 block mt-0.5">Sistem membaca No Soal, KD, Materi Pokok, Level Kognitif (L1/L2/L3), dan Indikator Soal secara instan.</span>
+                  <span class="text-sm font-bold text-white block">Klik atau Tarik Dokumen Kisi-Kisi (Word atau Excel) ke Sini</span>
+                  <span class="text-xs text-slate-400 block mt-0.5">Mendukung berkas <strong>.docx (Word)</strong> dan <strong>.xlsx / .xls (Excel)</strong>. Sistem membaca KD, Materi, Level, & Indikator secara instan.</span>
                 </div>
               </div>
-              <input type="file" id="kisiKisiFileInput" accept=".xlsx, .xls, .csv" class="hidden">
+              <input type="file" id="kisiKisiFileInput" accept=".docx, .xlsx, .xls, .csv" class="hidden">
             </div>
           </div>
 

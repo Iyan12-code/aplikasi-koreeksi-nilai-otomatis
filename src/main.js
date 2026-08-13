@@ -22,7 +22,8 @@ import { renderOnboardingSplash } from './components/OnboardingSplash.js';
 
 import { processOmrImage } from './services/omrService.js';
 import { buildDiagnosticPrompt, callGroqAi, generateLocalDiagnosticFallback } from './services/aiService.js';
-import { parseStudentsFromExcel, parseKisiKisiFromExcel, downloadKisiKisiTemplate, exportFullExcelReport } from './services/excelService.js';
+import { parseStudentsFromExcel, downloadKisiKisiTemplate, exportFullExcelReport } from './services/excelService.js';
+import { parseKisiKisiFile } from './services/kisiKisiParser.js';
 
 // Global App Object for inline template handlers & CRUD & Auth & Profile
 window.app = {
@@ -686,11 +687,11 @@ function bindEvents() {
     if (e.target.files.length > 0) {
       const file = e.target.files[0];
       try {
-        const parsed = await parseKisiKisiFromExcel(file);
+        const parsed = await parseKisiKisiFile(file);
         if (parsed && parsed.count > 0) {
           store.setKisiKisiData(parsed);
           if (kisiKisiStatusBadge) kisiKisiStatusBadge.innerText = `${parsed.count} Indikator Terhubung`;
-          showToast(`Dokumen Kisi-Kisi Berhasil Dibaca! ${parsed.count} butir soal, KD, dan indikator terhubung ke AI.`, "success");
+          showToast(`Dokumen Kisi-Kisi (${file.name}) Berhasil Dibaca! ${parsed.count} butir soal, KD, dan indikator terhubung ke AI.`, "success");
         } else {
           showToast("Format kisi-kisi tidak terdeteksi. Gunakan format template atau tombol Preset.", "error");
         }
