@@ -37,21 +37,6 @@ export function renderExamTab() {
               <div>
                 <label for="examSubject" class="block text-xs font-bold text-slate-300 mb-2">Mata Pelajaran & Kelas</label>
                 <input type="text" id="examSubject" value="${state.exam.subject}" placeholder="cth. Bahasa Indonesia Kelas VI" class="w-full bg-slate-950/80 border border-white/10 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
-                
-                <div class="flex flex-wrap gap-2 mt-2.5">
-                  <button type="button" class="btn-chip" data-subject="Matematika Kelas VI">
-                    <i class="fa-solid fa-calculator text-[10px]"></i> Matematika
-                  </button>
-                  <button type="button" class="btn-chip" data-subject="Bahasa Indonesia Kelas VI">
-                    <i class="fa-solid fa-book text-[10px]"></i> Bahasa Indonesia
-                  </button>
-                  <button type="button" class="btn-chip" data-subject="Ilmu Pengetahuan Alam (IPA)">
-                    <i class="fa-solid fa-flask text-[10px]"></i> IPA
-                  </button>
-                  <button type="button" class="btn-chip" data-subject="Pendidikan Pancasila">
-                    <i class="fa-solid fa-landmark text-[10px]"></i> PPKn
-                  </button>
-                </div>
               </div>
 
               <!-- Nilai KKM & Format Lembar Jawaban (Fixed 25 Soal) -->
@@ -75,7 +60,7 @@ export function renderExamTab() {
                       <i class="fa-solid fa-file-circle-check text-indigo-400 text-sm"></i>
                       <span class="text-xs font-extrabold text-indigo-300">25 Butir Soal (PG)</span>
                     </div>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">Standar 5 Kolom</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">Maksimal 25 Soal</span>
                   </div>
                   <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 mt-2.5">
                     <span class="text-[11px] text-slate-400 block leading-snug">
