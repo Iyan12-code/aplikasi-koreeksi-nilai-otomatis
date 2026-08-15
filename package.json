@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.4",
     "@tailwindcss/vite": "^4.0.9",
     "concurrently": "^9.1.2",
     "jszip": "^3.10.1",
