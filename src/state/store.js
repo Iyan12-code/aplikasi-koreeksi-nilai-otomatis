@@ -330,13 +330,14 @@ class Store {
 
   login(user) {
     const fullUser = {
-      fullName: user.fullName || 'Budi Santoso, M.Pd',
+      fullName: user.fullName || (user.email === 'guru@sekolah.id' ? 'Budi Santoso, M.Pd' : user.email.split('@')[0]),
       email: user.email,
       institution: user.institution || 'SD Negeri 01 Pagi',
       role: user.role || 'Guru Kelas VI',
       username: user.username || user.email.split('@')[0] || 'guru',
       status: 'Aktif'
     };
+    
     this.setState({
       isAuthenticated: true,
       currentUser: fullUser,
@@ -345,18 +346,33 @@ class Store {
     });
     localStorage.setItem(AUTH_KEY, JSON.stringify(fullUser));
 
-    // Sinkronisasi data asesmen dari Turso Cloud Database
+    // Sinkronisasi data asesmen spesifik milik akun ini dari Turso Cloud Database
     loadAssessmentFromTurso(fullUser.email).then(cloudData => {
       if (cloudData) {
         this.setState({
           exam: cloudData.exam || this.state.exam,
-          students: (cloudData.students && cloudData.students.length > 0) ? cloudData.students : this.state.students,
-          answerKeys: cloudData.answerKeys || this.state.answerKeys,
-          questionMaterials: cloudData.questionMaterials || this.state.questionMaterials,
-          questionIndicators: cloudData.questionIndicators || this.state.questionIndicators,
-          questionKDs: cloudData.questionKDs || this.state.questionKDs,
-          questionLevels: cloudData.questionLevels || this.state.questionLevels,
-          history: (cloudData.history && cloudData.history.length > 0) ? cloudData.history : this.state.history,
+          students: (cloudData.students && cloudData.students.length > 0) ? cloudData.students : [],
+          answerKeys: cloudData.answerKeys || Array(25).fill('A'),
+          questionMaterials: cloudData.questionMaterials || Array(25).fill(''),
+          questionIndicators: cloudData.questionIndicators || Array(25).fill(''),
+          questionKDs: cloudData.questionKDs || Array(25).fill(''),
+          questionLevels: cloudData.questionLevels || Array(25).fill('L1'),
+          history: (cloudData.history && cloudData.history.length > 0) ? cloudData.history : [],
+        });
+      } else if (fullUser.email !== 'guru@sekolah.id') {
+        // Pengguna baru yang belum memiliki data di cloud -> mulai dengan ruang kerja bersih
+        this.setState({
+          exam: { subject: '', kkm: 75, totalQuestions: 25 },
+          students: [],
+          activeStudentIndex: 0,
+          answerKeys: Array(25).fill('A'),
+          questionMaterials: Array(25).fill(''),
+          questionIndicators: Array(25).fill(''),
+          questionKDs: Array(25).fill(''),
+          questionLevels: Array(25).fill('L1'),
+          currentOmrResult: null,
+          latestAiText: '',
+          history: [],
         });
       }
     });
@@ -377,11 +393,27 @@ class Store {
     localStorage.setItem(USERS_DB_KEY, JSON.stringify(users));
     saveUserToTurso({ ...fullUser, password: user.password });
 
+    // Akun baru mendapatkan ruang kerja bersih (Fresh Workspace) miliknya sendiri
     this.setState({
       isAuthenticated: true,
       currentUser: fullUser,
       activeTab: 'tab-exam',
       showOnboardingSplash: true,
+      exam: {
+        subject: '',
+        kkm: 75,
+        totalQuestions: 25,
+      },
+      students: [],
+      activeStudentIndex: 0,
+      answerKeys: Array(25).fill('A'),
+      questionMaterials: Array(25).fill(''),
+      questionIndicators: Array(25).fill(''),
+      questionKDs: Array(25).fill(''),
+      questionLevels: Array(25).fill('L1'),
+      currentOmrResult: null,
+      latestAiText: '',
+      history: [],
     });
     localStorage.setItem(AUTH_KEY, JSON.stringify(fullUser));
   }
