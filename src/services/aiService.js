@@ -37,7 +37,7 @@ export function buildDiagnosticPrompt(exam, studentName, omrResult, questionMate
   }
 
   return `
-Anda adalah seorang Dosen dan Pakar Evaluasi Asesmen Pendidikan Nasional. Tugas Anda adalah menyusun Laporan Diagnostik Pembelajaran yang SANGAT MENDALAM, SPESIFIK, dan BUKAN TEMPLATE UMUM untuk siswa berikut berdasarkan dokumen kisi-kisi dan kesalahan jawaban aktualnya:
+Anda adalah seorang guru kelas sekolah dasar yang ramah dan berpengalaman. Tugas Anda adalah menyusun laporan evaluasi belajar yang bahasanya sederhana, mudah dipahami oleh guru dan orang tua, serta langsung pada tindakan nyata di kelas untuk siswa yang bersangkutan berdasarkan data berikut:
 
 === DATA PENILAIAN SISWA ===
 - Nama Siswa: ${studentName}
@@ -48,33 +48,30 @@ Anda adalah seorang Dosen dan Pakar Evaluasi Asesmen Pendidikan Nasional. Tugas 
 === RINCIAN BUTIR SOAL YANG SALAH BESERTA INDIKATORNYA ===
 ${wrongQuestions.length > 0 ? wrongQuestions.join('\n\n') : 'Siswa menjawab seluruh soal dengan benar (100% Sempurna).'}
 
-=== INSTRUKSI KHUSUS PENYUSUNAN LAPORAN (6 STRUKTUR HARUS SPESIFIK) ===
-Tulis laporan dalam format Markdown dengan 6 heading berikut. PENTING: Bagian 2, 3, 4, 5, dan 6 WAJIB mengupas secara mendalam SETIAP BUTIR SOAL/INDIKATOR yang dijawab salah oleh ${studentName} di atas:
+=== INSTRUKSI KHUSUS PENYUSUNAN LAPORAN (6 STRUKTUR) ===
+Tulis laporan dalam format Markdown dengan 6 heading berikut menggunakan kalimat yang sederhana, membumi, dan mudah dicerna oleh guru SD:
 
 ### 1. Kesimpulan Tingkat Penguasaan Kompetensi
-Ulas pencapaian skor (${score}) terhadap KKM (${kkm}). Identifikasi persentase penguasaan kompetensi siswa secara keseluruhan.
+Jelaskan perolehan nilai siswa dibandingkan KKM dengan bahasa yang santai, jelas, dan mudah dipahami.
 
 ### 2. Analisis Kesalahan Berdasarkan Indikator & Butir Soal
-Untuk setiap butir soal yang salah (sebutkan nomor soal, materi, level kognitif L1/L2/L3, dan indikatornya):
-- Analisis secara kritis letak miskonsepsi atau kelemahan nalar siswa yang menyebabkan ia memilih opsi yang keliru.
+Untuk setiap soal yang salah, jelaskan letak kesilapan atau bagian materi apa yang membuat siswa tertukar atau kurang teliti dalam memilih jawaban.
 
 ### 3. Rekomendasi Penguatan Konsep Berdasarkan Indikator Materi
-Bedah setiap indikator materi yang belum dikuasai siswa di atas:
-- Jelaskan konsep inti apa yang harus diulang pemahamannya oleh ${studentName}.
-- Berikan contoh konkret atau analogi materi agar siswa dapat memahami letak kekeliruannya.
+Berikan saran penjelasan sederhana agar materi pada soal yang salah tersebut dapat dicerna dengan mudah oleh guru sekolah dasar menggunakan contoh atau analogi sehari-hari.
 
 ### 4. Rekomendasi Metode Pembelajaran Khusus Guru di Kelas
-Berikan rekomendasi metode pengajaran pedagogik yang spesifik dirancang untuk mengatasi kesalahan indikator tersebut (Contoh: jika salah pada materi rotasi/gerhana -> rekomendasikan Metode Demonstrasi Model 3D/Visual; jika salah pada energi/lingkungan -> rekomendasikan Problem-Based Learning (PBL) berbasis studi kasus; jika salah pada klasifikasi/tata surya -> rekomendasikan Concept Mapping & Inkuiri Terbimbing). Jelaskan bagaimana guru menerapkan metode tersebut di kelas untuk membantu ${studentName}.
+Berikan saran tindakan praktis bagi guru di kelas (misalnya: guru melakukan pendampingan khusus, menggunakan alat peraga sederhana, gambar, atau benda nyata) untuk membantu siswa memahami materi yang masih keliru.
 
 ### 5. Panduan Latihan & Belajar Mandiri Siswa di Rumah
-Rancang 2-3 langkah latihan mandiri yang terarah langsung pada indikator yang salah tersebut (misalnya: penugasan pembuatan mind map, latihan 3 soal analog terstruktur, atau observasi mandiri).
+Berikan 2-3 langkah latihan ringan di rumah yang bisa dikerjakan anak bersama orang tua, seperti membaca kembali buku atau mencoba latihan soal serupa.
 
 ### 6. Program Tindak Lanjut: ${score >= kkm ? 'PENGAYAAN' : 'REMEDIAL TERFOKUS'}
 ${score >= kkm 
-  ? 'Rancang program pengayaan dengan soal-soal penalaran tingkat tinggi (HOTS) atau mini-riset yang memperluas kompetensi siswa.'
-  : 'Rancang jadwal dan modul remedial klinis yang hanya menguji ulang indikator-indikator yang salah di atas beserta bentuk tes konfirmasi ulang (re-test).'}
+  ? 'Berikan saran pengayaan berupa latihan soal tambahan yang lebih menantang agar wawasan siswa semakin luas.'
+  : 'Berikan saran jadwal bimbingan singkat (remedial) dan pengulangan latihan soal secara sederhana.'}
 
-Gunakan Bahasa Indonesia baku, akademik, solutif, empatik, dan bebas dari kalimat klise yang bersifat umum.
+Gunakan Bahasa Indonesia yang baik, santun, membumi, dan ramah dibaca oleh guru SD atau orang tua murid.
 `.trim();
 }
 
@@ -95,7 +92,7 @@ export async function callGroqAi(prompt, apiKey) {
       messages: [
         {
           role: "system",
-          content: "Anda adalah Pakar Asesmen Pendidikan dan Dosen Evaluasi Pembelajaran Kurikulum Nasional. Anda menyusun laporan diagnostik yang sangat mendalam, personal, dan mengaitkan rekomendasi metode guru dengan letak kesalahan indikator siswa."
+          content: "Anda adalah guru kelas sekolah dasar yang komunikatif, ramah, dan berpengalaman dalam menyusun laporan belajar siswa dengan bahasa yang sederhana serta mudah dipahami."
         },
         {
           role: "user",
@@ -150,49 +147,50 @@ export function generateLocalDiagnosticFallback(studentName, exam, omrResult, qu
 
   return `
 ### 1. Kesimpulan Tingkat Penguasaan Kompetensi
-Berdasarkan hasil asesmen mata pelajaran **${subject}**, ananda **${studentName}** memperoleh skor akhir **${score} / 100** dengan menjawab benar **${correctCount}** butir dan salah **${wrongCount}** butir dari total **${effectiveTotal}** butir soal. Dengan KKM yang ditetapkan sebesar **${kkm}**, capaian siswa dinyatakan **${isTuntas ? 'TELAH MENCAPAI KETUNTASAN (TUNTAS)' : 'BELUM MENCAPAI KETUNTASAN (MEMERLUKAN PROGRAM REMEDIAL)'}**.
+Halo! Berdasarkan hasil tugas **${subject}**, siswa **${studentName}** mendapatkan nilai **${score}** dari KKM **${kkm}**. siswa menjawab benar **${correctCount}** soal dan keliru **${wrongCount}** soal dari total **${effectiveTotal}** butir soal. Status capaian belajar siswa dinyatakan **${isTuntas ? 'TELAH TUNTAS DAN BERHASIL' : 'BELUM TUNTAS DAN PERLU PENDAMPINGAN KHUSUS'}**.
 
 ### 2. Analisis Kesalahan Berdasarkan Indikator & Butir Soal
-${wrongItems.length > 0 ? `Berdasarkan pemetaan dokumen kisi-kisi, letak kelemahan konseptual ananda **${studentName}** teridentifikasi pada butir soal berikut:\n` + wrongItems.map(item => `
+${wrongItems.length > 0 ? `Berdasarkan pemindaian jawaban, siswa **${studentName}** masih keliru pada bagian materi berikut:\n` + wrongItems.map(item => `
 * **Soal No. ${item.num}** (Level Kognitif: \`${item.level}\`)
-  - **Materi / TP**: ${item.materi} ${item.kd ? `(${item.kd})` : ''}
+  - **Materi**: ${item.materi} ${item.kd ? `(${item.kd})` : ''}
   - **Indikator**: *"${item.indikator}"*
-  - **Letak Kesalahan**: Siswa memilih opsi **\`${item.studentAns}\`** padahal kunci jawaban yang benar adalah **\`${item.correctAns}\`**. Hal ini mengindikasikan adanya miskonsepsi dalam memahami prinsip dasar pada indikator tersebut.
-`).join('\n') : `Siswa berhasil menguasai seluruh indikator soal dengan sempurna (Tingkat akurasi 100%).`}
+  - **Catatan**: siswa memilih jawaban **\`${item.studentAns}\`**, padahal kunci jawaban yang benar adalah **\`${item.correctAns}\`**. Sepertinya siswa tertukar atau kurang teliti pada bagian ini.
+`).join('\n') : `Hebat! siswa menjawab seluruh soal dengan benar (Akurasi 100%).`}
 
 ### 3. Rekomendasi Penguatan Konsep Berdasarkan Indikator Materi
-${wrongItems.length > 0 ? `Untuk mengatasi kelemahan spesifik di atas, langkah perbaikan materi difokuskan pada:\n` + wrongItems.map(item => `
+${wrongItems.length > 0 ? `Agar siswa lebih paham, penjelasan materi dapat difokuskan pada:\n` + wrongItems.map(item => `
 * **Penguatan Materi Soal No. ${item.num} (${item.materi})**:
-  - Siswa perlu menelaah kembali konsep inti mengenai *"${item.indikator}"*. Fokuskan pada pembedaan kata kunci dan analisis karakteristik objek yang diujikan agar siswa tidak terkecoh oleh opsi distraktor.
-`).join('\n') : `Pertahankan penguasaan materi dengan terus melatih variasi soal penalaran lanjutan.`}
+  - Ajak siswa mengulang kembali membaca materi mengenai *"${item.indikator}"*. Berikan contoh benda nyatanya atau ingatkan kembali kata kunci pada materi tersebut agar tidak terkecoh.
+`).join('\n') : `Pertahankan prestasi belajar siswa dengan memberikan bacaan atau latihan soal yang lebih menantang.`}
 
-### 4. Rekomendasi Metode Pembelajaran Khusus Guru di Kelas
-${wrongItems.length > 0 ? `Guru disarankan menerapkan strategi pembelajaran diferensiasi dengan metode pedagogik berikut untuk membimbing **${studentName}**:\n` + wrongItems.map(item => {
-  let metodeSaran = "Metode Scaffolding dan Diskusi Terbimbing";
+### 4. Rekomendasi Cara Pembelajaran Khusus Guru di Kelas
+${wrongItems.length > 0 ? `Guru melakukan pendampingan belajar ke siswa **${studentName}** karena siswa tersebut kurang pada mata pelajaran **${subject}**, khususnya pada beberapa bagian berikut:\n` + wrongItems.map(item => {
+  let metodeSaran = `Guru membimbing siswa **${studentName}** untuk mengulang kembali materi **${item.materi}** menggunakan contoh benda nyata atau gambar di kelas.`;
   if (item.materi.toLowerCase().includes('rotasi') || item.materi.toLowerCase().includes('gerhana') || item.materi.toLowerCase().includes('planet') || item.materi.toLowerCase().includes('tata surya') || item.materi.toLowerCase().includes('geografis') || item.materi.toLowerCase().includes('peta')) {
-    metodeSaran = "**Metode Demonstrasi Visual & Model Konkret 3D** (menggunakan alat peraga/simulasi digital interaktif agar siswa melihat langsung fenomena spasial)";
+    metodeSaran = `Guru membimbing siswa **${studentName}** untuk memahami materi **${item.materi}** dengan menunjukkan contoh langsung atau alat peraga sederhana agar anak lebih mudah menangkap konsepnya.`;
   } else if (item.materi.toLowerCase().includes('energi') || item.materi.toLowerCase().includes('lingkungan') || item.materi.toLowerCase().includes('ekonomi') || item.materi.toLowerCase().includes('penebangan')) {
-    metodeSaran = "**Metode Problem-Based Learning (PBL) Berbasis Studi Kasus** (memberikan lembar kerja bergambar mengenai sebab-akibat dampak lingkungan/perubahan energi)";
+    metodeSaran = `Guru membimbing siswa **${studentName}** menggunakan contoh cerita sehari-hari atau gambar lingkungan terkait materi **${item.materi}**.`;
   } else if (item.materi.toLowerCase().includes('sejarah') || item.materi.toLowerCase().includes('tokoh') || item.materi.toLowerCase().includes('asean') || item.materi.toLowerCase().includes('proklamasi')) {
-    metodeSaran = "**Metode Concept Mapping & Garis Waktu Kronologis** (membantu siswa mengasosiasikan nama tokoh, peran, dan peristiwa sejarah dalam bagan visual terstruktur)";
+    metodeSaran = `Guru membimbing siswa **${studentName}** menggunakan kartu bergambar atau catatan kecil berwarna untuk materi **${item.materi}**.`;
   } else {
-    metodeSaran = "**Metode Inkuiri Terbimbing & Latihan Bertingkat** (membedah contoh soal dari tingkat konkret ke analitis)";
+    metodeSaran = `Guru membimbing siswa **${studentName}** mengerjakan ulang latihan secara bertahap pada materi **${item.materi}**.`;
   }
-  return `* **Untuk Mengatasi Soal No. ${item.num} (${item.materi})**:\n  - Terapkan ${metodeSaran} dalam sesi pendampingan kelompok kecil di kelas.`;
-}).join('\n') : `* Guru dapat menunjuk siswa sebagai tutor sebaya (*peer tutor*) untuk membantu teman sekelas.`}
+  return `* **Materi Soal No. ${item.num} (${item.materi})**:\n  - ${metodeSaran}`;
+}).join('\n') : `* Guru dapat mengarahkan siswa **${studentName}** untuk membantu teman sekelasnya yang lain.`}
 
 ### 5. Panduan Latihan & Belajar Mandiri Siswa di Rumah
-${wrongItems.length > 0 ? `Rekomendasi penugasan terarah yang dapat dikerjakan ananda **${studentName}** secara mandiri:\n` + wrongItems.map(item => `
-1. Membuat ringkasan satu lembar (*mind-map*) mengenai materi **${item.materi}** dengan mencantumkan poin-poin utama dari indikator *"${item.indikator}"*.
-2. Mengerjakan 2–3 soal latihan sejenis (soal analog) untuk menguji pemahaman baru pada topik tersebut.
-`).join('') : `1. Mempelajari materi pada bab berikutnya secara mandiri dan membuat rangkuman pengayaan.`}
+${wrongItems.length > 0 ? `Saran kegiatan yang bisa dikerjakan siswa **${studentName}** di rumah bersama orang tua:\n` + wrongItems.map(item => `
+1. Menyalin ringkasan singkat materi **${item.materi}** di buku tulis agar lebih melekat di ingatan.
+2. Mengerjakan ulang 2 sampai 3 soal latihan serupa untuk topik tersebut.
+`).join('') : `1. Membaca materi bab berikutnya sebagai persiapan belajar mandiri.`}
 
-### 6. Program Tindak Lanjut: ${isTuntas ? 'PENGAYAAN' : 'REMEDIAL TERSTRUKTUR'}
+### 6. Program Tindak Lanjut: ${isTuntas ? 'PENGAYAAN' : 'REMEDIAL TERFOKUS'}
 ${isTuntas ? `
-* **Program Pengayaan**: Diberikan penugasan berbasis penalaran tingkat tinggi (HOTS) pada kompetensi **${subject}** untuk memperluas wawasan konseptual siswa.
+* **Program Pengayaan**: Berikan soal cerita tambahan atau tantangan seru agar kemampuannya semakin terasah pada mata pelajaran **${subject}**.
 ` : `
-* **Bimbingan Remedial Klinis**: Guru menjadwalkan sesi bimbingan khusus berdurasi 30 menit yang hanya membedah ${wrongItems.length} indikator materi yang keliru di atas.
-* **Asesmen Ulang Konfirmasi (*Re-Test*)**: Diberikan 5 butir soal baru dengan indikator yang setara untuk memastikan tuntasnya Kompetensi Pembelajaran sebelum berpindah ke unit pelajaran berikutnya.
+* **Jadwal Remedial**: Guru meluangkan waktu sekitar 15–20 menit untuk memberikan bimbingan khusus dan latihan ulang kepada siswa **${studentName}** pada materi yang masih keliru sebelum melanjutkan ke pelajaran berikutnya.
 `}
 `.trim();
 }
+
+//metode pembelajaran  berbasis gambar 
