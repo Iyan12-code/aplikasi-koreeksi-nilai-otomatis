@@ -161,8 +161,8 @@ Ananda **Ahmad Dani** memperoleh nilai akhir **88 / 100** (22 Benar, 3 Salah) pa
 * **Penguatan Soal No. 19**: Pengenalan bentuk siluet peta 10 negara anggota ASEAN.
 
 ### 4. Rekomendasi Metode Pembelajaran Khusus Guru di Kelas
-* **Metode Demonstrasi Peta Interaktif & Concept Mapping**: Guru menggunakan peta digital atau atlas tematik untuk menelusuri batas biogeografi fauna dan lokasi negara ASEAN bersama siswa.
-* **Metode Problem-Based Learning (PBL) Berbasis Gambar**: Menghadapkan siswa pada foto kerusakan lingkungan untuk melatih analisis dampak multisektoral.
+* **Metode Demonstrasi dan konsep Peta Interaktif**: Guru menggunakan peta digital atau atlas tematik untuk menelusuri batas biogeografi fauna dan lokasi negara ASEAN bersama siswa.
+* **Metode Pembelajaran Berbasis Gambar**: Menghadapkan siswa pada foto kerusakan lingkungan untuk melatih analisis dampak multisektoral.
 
 ### 5. Panduan Latihan & Belajar Mandiri Siswa di Rumah
 1. Membuat peta buta pembagian fauna Asiatis dan Australis di buku catatan.
