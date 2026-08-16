@@ -37,7 +37,7 @@ export function buildDiagnosticPrompt(exam, studentName, omrResult, questionMate
   }
 
   return `
-Anda adalah seorang guru kelas sekolah dasar yang ramah dan berpengalaman. Tugas Anda adalah menyusun laporan evaluasi belajar yang bahasanya sederhana, mudah dipahami oleh guru dan orang tua, serta langsung pada tindakan nyata di kelas untuk siswa yang bersangkutan berdasarkan data berikut:
+Anda adalah seorang guru kelas sekolah dasar yang komunikatif, ramah, dan berpengalaman. Tugas Anda adalah menyusun Laporan Evaluasi Belajar Siswa yang bahasanya SANGAT SEDERHANA, PRAKTIS, MUDAH DIPAHAMI GURU SD & ORANG TUA, SERTA BEBAS DARI ISTILAH ASING/TEORI KAMPUS berdasarkan data berikut:
 
 === DATA PENILAIAN SISWA ===
 - Nama Siswa: ${studentName}
@@ -48,30 +48,41 @@ Anda adalah seorang guru kelas sekolah dasar yang ramah dan berpengalaman. Tugas
 === RINCIAN BUTIR SOAL YANG SALAH BESERTA INDIKATORNYA ===
 ${wrongQuestions.length > 0 ? wrongQuestions.join('\n\n') : 'Siswa menjawab seluruh soal dengan benar (100% Sempurna).'}
 
-=== INSTRUKSI KHUSUS PENYUSUNAN LAPORAN (6 STRUKTUR) ===
-Tulis laporan dalam format Markdown dengan 6 heading berikut menggunakan kalimat yang sederhana, membumi, dan mudah dicerna oleh guru SD:
+=== ATURAN BAHASA WAJIB (PENTING!) ===
+1. DILARANG KERAS menggunakan istilah bahasa Inggris atau istilah kampus yang rumit (DILARANG menggunakan kata: scaffolding, problem-based learning, inkuiri terbimbing, concept mapping, peer tutor, re-test, distractor, kognitif, HOTS, biogeografi, komparasi, dll).
+2. Gantilah dengan bahasa sehari-hari guru SD:
+   - Gunakan "Bimbingan langkah demi langkah dari yang mudah" (bukan scaffolding).
+   - Gunakan "Belajar lewat contoh kejadian nyata di sekitar anak" (bukan problem-based learning).
+   - Gunakan "Membuat catatan rangkuman ringkas atau bagan sederhana" (bukan concept mapping).
+   - Gunakan "Menggunakan gambar, foto, atau benda nyata di kelas" (bukan demonstrasi visual 3D).
+   - Gunakan "Latihan ulangan singkat 3 sampai 5 soal" (bukan re-test/asesmen klinis).
+3. Seluruh rekomendasi harus mengalir langsung dari materi dan indikator soal yang salah pada siswa tersebut.
+
+=== INSTRUKSI KHUSUS PENYUSUNAN LAPORAN (6 STRUKTUR BAKU) ===
+Tulis laporan dalam format Markdown dengan 6 heading berikut:
 
 ### 1. Kesimpulan Tingkat Penguasaan Kompetensi
-Jelaskan perolehan nilai siswa dibandingkan KKM dengan bahasa yang santai, jelas, dan mudah dipahami.
+Jelaskan perolehan nilai siswa dibandingkan KKM dengan bahasa yang santai, jelas, dan memotivasi.
 
 ### 2. Analisis Kesalahan Berdasarkan Indikator & Butir Soal
-Untuk setiap soal yang salah, jelaskan letak kesilapan atau bagian materi apa yang membuat siswa tertukar atau kurang teliti dalam memilih jawaban.
+Untuk setiap butir soal yang salah (sebutkan nomor soal, materi, dan indikatornya):
+Jelaskan letak kesilapan siswa, bagian materi mana yang membuat siswa tertukar, atau mengapa siswa kurang teliti dalam memilih jawaban.
 
 ### 3. Rekomendasi Penguatan Konsep Berdasarkan Indikator Materi
-Berikan saran penjelasan sederhana agar materi pada soal yang salah tersebut dapat dicerna dengan mudah oleh guru sekolah dasar menggunakan contoh atau analogi sehari-hari.
+Uraikan penjelasan sederhana untuk setiap materi yang belum dikuasai siswa di atas. Berikan contoh mudah atau perumpamaan sehari-hari agar anak paham letak kekeliruannya.
 
-### 4. Rekomendasi Metode Pembelajaran Khusus Guru di Kelas
-Berikan saran tindakan praktis bagi guru di kelas (misalnya: guru melakukan pendampingan khusus, menggunakan alat peraga sederhana, gambar, atau benda nyata) untuk membantu siswa memahami materi yang masih keliru.
+### 4. Rekomendasi Cara Mengajar Guru di Kelas
+Berikan saran tindakan nyata yang bisa dilakukan guru di kelas untuk membimbing siswa pada materi yang salah tersebut (misalnya: mengajak tanya-jawab bergambar, memperlihatkan benda di sekitar kelas, atau membimbing latihan langkah demi langkah).
 
-### 5. Panduan Latihan & Belajar Mandiri Siswa di Rumah
-Berikan 2-3 langkah latihan ringan di rumah yang bisa dikerjakan anak bersama orang tua, seperti membaca kembali buku atau mencoba latihan soal serupa.
+### 5. Panduan Latihan Siswa di Rumah
+Berikan 2 sampai 3 saran latihan ringan yang bisa dikerjakan anak di rumah bersama orang tua, seperti membaca kembali catatan atau mencoba 2-3 soal latihan serupa.
 
-### 6. Program Tindak Lanjut: ${score >= kkm ? 'PENGAYAAN' : 'REMEDIAL TERFOKUS'}
+### 6. Rencana Tindak Lanjut: ${score >= kkm ? 'PENGAYAAN' : 'REMEDIAL'}
 ${score >= kkm 
-  ? 'Berikan saran pengayaan berupa latihan soal tambahan yang lebih menantang agar wawasan siswa semakin luas.'
-  : 'Berikan saran jadwal bimbingan singkat (remedial) menggunakan bimbingan bertahap dan pengulangan latihan soal secara sederhana.'}
+  ? 'Berikan saran pengayaan berupa latihan soal cerita tambahan yang seru dan menantang agar wawasan siswa semakin luas.'
+  : 'Berikan saran jadwal bimbingan remedial singkat (sekitar 15-20 menit) di mana guru menjelaskan ulang materi yang masih salah, lalu memberikan 3-5 soal latihan sederhana untuk memastikan anak sudah benar-benar paham.'}
 
-Gunakan Bahasa Indonesia yang baik, santun, membumi, dan ramah dibaca oleh guru SD atau orang tua murid.
+Gunakan Bahasa Indonesia yang santun, sederhana, membumi, dan ramah dibaca oleh guru SD maupun orang tua murid.
 `.trim();
 }
 
@@ -92,7 +103,7 @@ export async function callGroqAi(prompt, apiKey) {
       messages: [
         {
           role: "system",
-          content: "Anda adalah guru kelas sekolah dasar yang komunikatif, ramah, dan berpengalaman dalam menyusun laporan belajar siswa dengan bahasa yang sederhana serta mudah dipahami."
+          content: "Anda adalah guru kelas SD yang ramah, bijak, dan berpengalaman. Anda selalu menulis laporan belajar siswa menggunakan Bahasa Indonesia yang sangat sederhana, membumi, praktis, dan tanpa istilah asing atau bahasa teori yang rumit."
         },
         {
           role: "user",

@@ -230,14 +230,14 @@ Ananda **Dedi Kurniawan** memperoleh nilai **64 / 100** (16 Benar, 9 Salah). Sko
 ### 3. Rekomendasi Penguatan Konsep Berdasarkan Indikator Materi
 * Pengulangan konsep dasar istilah maritim vs agraris serta peta ekonomi ASEAN secara bertahap.
 
-### 4. Rekomendasi Metode Pembelajaran Khusus Guru di Kelas
-* **Metode Scaffolding & Pendampingan Terbimbing 1-on-1**: Guru memecah materi menjadi segmen-segmen kecil dengan bantuan kartu bergambar (*visual flashcards*).
+### 4. Rekomendasi Cara Mengajar Guru di Kelas
+* **Bimbingan Langkah demi Langkah**: Guru mendampingi siswa mulai dari soal yang paling mudah, lalu perlahan membantu siswa mencoba soal berikutnya secara mandiri dengan bantuan kartu gambar.
 
-### 5. Panduan Latihan & Belajar Mandiri Siswa di Rumah
-* Mengulang membaca ringkasan bab Karakteristik Indonesia dan ASEAN selama 20 menit setiap sore.
+### 5. Panduan Latihan Siswa di Rumah
+* Mengulang membaca ringkasan bab Karakteristik Indonesia dan ASEAN selama 15 menit setiap sore bersama orang tua.
 
-### 6. Program Tindak Lanjut: REMEDIAL TERSTRUKTUR
-* Siswa dijadwalkan mengikuti sesi remedial khusus pada 9 indikator materi di atas, dilanjutkan tes konfirmasi ulang 10 butir soal.`
+### 6. Rencana Tindak Lanjut: REMEDIAL
+* Siswa dijadwalkan mengikuti sesi bimbingan singkat sekitar 20 menit pada materi yang masih keliru, dilanjutkan latihan 3-5 soal sederhana.`
   }
 ];
 
