@@ -69,7 +69,7 @@ Berikan 2-3 langkah latihan ringan di rumah yang bisa dikerjakan anak bersama or
 ### 6. Program Tindak Lanjut: ${score >= kkm ? 'PENGAYAAN' : 'REMEDIAL TERFOKUS'}
 ${score >= kkm 
   ? 'Berikan saran pengayaan berupa latihan soal tambahan yang lebih menantang agar wawasan siswa semakin luas.'
-  : 'Berikan saran jadwal bimbingan singkat (remedial) dan pengulangan latihan soal secara sederhana.'}
+  : 'Berikan saran jadwal bimbingan singkat (remedial) menggunakan bimbingan bertahap dan pengulangan latihan soal secara sederhana.'}
 
 Gunakan Bahasa Indonesia yang baik, santun, membumi, dan ramah dibaca oleh guru SD atau orang tua murid.
 `.trim();
@@ -186,9 +186,9 @@ ${wrongItems.length > 0 ? `Saran kegiatan yang bisa dikerjakan siswa **${student
 
 ### 6. Program Tindak Lanjut: ${isTuntas ? 'PENGAYAAN' : 'REMEDIAL TERFOKUS'}
 ${isTuntas ? `
-* **Program Pengayaan**: Berikan soal cerita tambahan atau tantangan seru agar kemampuannya semakin terasah pada mata pelajaran **${subject}**.
+* **Program Pengayaan**: Berikan soal cerita tambahan atau tantangan seru agar kemampuannya semakin tuntas pada mata pelajaran **${subject}**.
 ` : `
-* **Jadwal Remedial**: Guru meluangkan waktu sekitar 15–20 menit untuk memberikan bimbingan khusus dan latihan ulang kepada siswa **${studentName}** pada materi yang masih keliru sebelum melanjutkan ke pelajaran berikutnya.
+* **Jadwal Remedial**: Guru meluangkan waktu sekitar 15–20 menit untuk memberikan bimbingan bertahap dan latihan ulang yang lebih pelan kepada ananda **${studentName}** pada materi yang masih keliru sebelum melanjutkan ke pelajaran berikutnya.
 `}
 `.trim();
 }
