@@ -1,7 +1,7 @@
 /**
  * =========================================================
  * AI DIAGNOSTIC ENGINE (Groq LLaMA 3.3 Versatile & Dynamic Engine)
- * SmartEval AI Service - Indicator-Specific Pedagogical Analysis
+ * SmartEval AI Service - Indicator & Level-Specific Pedagogical Analysis
  * =========================================================
  */
 
@@ -42,7 +42,7 @@ Anda adalah seorang guru kelas SD yang komunikatif, ramah, dan berpengalaman. Tu
 - Capaian: ${correctCount} Benar, ${wrongCount} Salah (dari total ${effectiveTotal} butir soal pilihan ganda)
 
 === RINCIAN BUTIR SOAL YANG SALAH BESERTA INDIKATORNYA ===
-${wrongQuestions.length > 0 ? wrongQuestions.join('\n\n') : 'Siswa menjawab seluruh soal dengan benar (100% Sempurna).'}
+${wrongQuestions.length > 0 ? wrongQuestions.join('\n\n') : 'Siswa menjawab seluruh soal megenai tugas ini dengan benar (100% Sempurna).'}
 
 === ATURAN BAHASA WAJIB (PENTING!) ===
 1. DILARANG KERAS menggunakan istilah bahasa Inggris atau istilah kampus yang rumit (DILARANG menggunakan kata: scaffolding, problem-based learning, inkuiri terbimbing, concept mapping, peer tutor, re-test, distractor, kognitif, HOTS, biogeografi, komparasi, dll).
@@ -52,10 +52,13 @@ ${wrongQuestions.length > 0 ? wrongQuestions.join('\n\n') : 'Siswa menjawab selu
    - Gunakan "Membuat catatan rangkuman ringkas atau bagan sederhana" (bukan concept mapping).
    - Gunakan "Menggunakan gambar, foto, atau benda nyata di kelas" (bukan demonstrasi visual 3D).
    - Gunakan "Latihan ulangan singkat 3 sampai 5 soal" (bukan re-test/asesmen klinis).
-3. ATURAN KHUSUS UNTUK POIN 4 (Rekomendasi Cara Mengajar Guru di Kelas):
-   - WAJIB urutkan per butir soal yang salah (misal: "* **Materi Soal No. X (Nama Materi)**: ...").
-   - Setiap butir soal WAJIB memiliki saran aksi mengajar yang UNIK dan BERBEDA yang diambil langsung dari deskripsi "Indikator Soal" di atas.
-   - DILARANG KERAS mengulang kalimat saran yang sama antar-soal!
+3. ATURAN KHUSUS UNTUK POIN 2, 3, 4, DAN 5 (DILARANG MENGULANG KALIMAT SAMA):
+   - WAJIB urutkan per butir soal yang salah (misal: "* **Soal No. X (Nama Materi)**: ...").
+   - Setiap butir soal WAJIB memiliki ulasan yang UNIK dan BERBEDA berdasarkan teks Indikator Soal & Level Kognitif (L1/L2/L3) dari soal tersebut.
+   - Poin 2: Jelaskan analisis kesilapan siswa secara spesifik per nomor soal (apakah tertukar istilah, keliru membaca tabel/gambar, atau terburu-buru).
+   - Poin 3: Berikan saran penguatan konsep yang spesifik per nomor soal berdasarkan indikatornya.
+   - Poin 4: Berikan 1 cara mengajar guru yang konkret dan spesifik per nomor soal.
+   - Poin 5: Berikan 1-2 kegiatan belajar di rumah yang bervariasi bersama orang tua sesuai topik materi soal tersebut.
 
 === INSTRUKSI KHUSUS PENYUSUNAN LAPORAN (6 STRUKTUR BAKU) ===
 Tulis laporan dalam format Markdown dengan 6 heading berikut:
@@ -64,17 +67,16 @@ Tulis laporan dalam format Markdown dengan 6 heading berikut:
 Jelaskan perolehan nilai siswa dibandingkan KKM dengan bahasa yang santai, jelas, dan memotivasi.
 
 ### 2. Analisis Kesalahan Berdasarkan Indikator & Butir Soal
-Untuk setiap butir soal yang salah (sebutkan nomor soal, materi, dan indikatornya):
-Jelaskan letak kesilapan siswa, bagian materi mana yang membuat siswa tertukar, atau mengapa siswa kurang teliti dalam memilih jawaban.
+Rincikan per nomor soal yang salah (Soal No. X). Jelaskan letak kesilapan siswa secara spesifik berdasarkan Indikator Soal dan Level Kognitifnya (L1/L2/L3).
 
 ### 3. Rekomendasi Penguatan Konsep Berdasarkan Indikator Materi
-Uraikan penjelasan sederhana untuk setiap materi yang belum dikuasai siswa di atas. Berikan contoh mudah atau perumpamaan sehari-hari agar anak paham letak kekeliruannya.
+Rincikan per nomor soal yang salah (Soal No. X). Berikan penjelasan konsep kunci yang harus ditekankan ulang agar siswa paham.
 
 ### 4. Rekomendasi Cara Mengajar Guru di Kelas
-Rincikan per butir soal yang salah (Soal No. X). Berikan 1 cara mengajar yang konkret dan spesifik berdasarkan teks Indikator Soal tersebut (misal: jika indikatornya tentang gambar -> sarankan memakai foto/gambar; jika tentang tabel -> sarankan berlatih membaca kolom tabel; jika tentang menyebutkan -> sarankan tanya-jawab kata kunci).
+Rincikan per nomor soal yang salah (Soal No. X). Berikan 1 cara mengajar yang konkret dan spesifik berdasarkan teks Indikator Soal tersebut (misal: jika tentang gambar -> gunakan foto; jika tentang tabel -> latih membaca kolom; jika tentang istilah -> ajak tanya-jawab).
 
 ### 5. Panduan Latihan Siswa di Rumah
-Berikan 2 sampai 3 saran latihan ringan yang bisa dikerjakan anak di rumah bersama orang tua, seperti membaca kembali catatan atau mencoba 2-3 soal latihan serupa.
+Rincikan per nomor soal yang salah (Soal No. X). Berikan saran kegiatan belajar ringan di rumah bersama orang tua yang bervariasi sesuai topik materi.
 
 ### 6. Rencana Tindak Lanjut: ${score >= kkm ? 'PENGAYAAN' : 'REMEDIAL'}
 ${score >= kkm 
@@ -102,7 +104,7 @@ export async function callGroqAi(prompt, apiKey) {
       messages: [
         {
           role: "system",
-          content: "Anda adalah guru kelas SD yang ramah, bijak, dan berpengalaman. Anda selalu menulis laporan belajar siswa menggunakan Bahasa Indonesia yang sangat sederhana, membumi, praktis, dan tanpa istilah asing atau bahasa teori yang rumit. Pada Poin 4, Anda selalu memberikan saran mengajar yang unik per butir soal."
+          content: "Anda adalah guru kelas SD yang ramah, bijak, dan berpengalaman. Anda selalu menulis laporan belajar siswa menggunakan Bahasa Indonesia yang sangat sederhana, membumi, praktis, dan tanpa istilah asing. Pada Poin 2, 3, 4, dan 5, Anda selalu memberikan ulasan yang unik dan bervariasi untuk setiap butir soal."
         },
         {
           role: "user",
@@ -124,7 +126,7 @@ export async function callGroqAi(prompt, apiKey) {
 }
 
 /**
- * Pembangkit Diagnostik Berbasis Data Riil (Fallback Cerdas Berbasis Indikator Soal)
+ * Pembangkit Diagnostik Berbasis Data Riil (Fallback Cerdas Berbasis Indikator & Level Soal)
  */
 export function generateLocalDiagnosticFallback(studentName, exam, omrResult, questionMaterials = [], questionIndicators = [], questionKDs = [], questionLevels = []) {
   const { subject, kkm, totalQuestions = 25 } = exam;
@@ -160,18 +162,36 @@ export function generateLocalDiagnosticFallback(studentName, exam, omrResult, qu
 Halo! Berdasarkan hasil tugas **${subject}**, siswa **${studentName}** mendapatkan nilai **${score}** dari KKM **${kkm}**. Siswa menjawab benar **${correctCount}** soal dan keliru **${wrongCount}** soal dari total **${effectiveTotal}** butir soal. Status capaian belajar siswa dinyatakan **${isTuntas ? 'TELAH TUNTAS DAN BERHASIL' : 'BELUM TUNTAS DAN PERLU PENDAMPINGAN KHUSUS'}**.
 
 ### 2. Analisis Kesalahan Berdasarkan Indikator & Butir Soal
-${wrongItems.length > 0 ? `Berdasarkan pemindaian jawaban, siswa **${studentName}** masih keliru pada bagian materi berikut:\n` + wrongItems.map(item => `
-* **Soal No. ${item.num}** (Level Kognitif: \`${item.level}\`)
+${wrongItems.length > 0 ? `Berdasarkan pemindaian jawaban, rincian kesilapan siswa **${studentName}** adalah sebagai berikut:\n` + wrongItems.map(item => {
+  let alasanKesalahan = "";
+  if (item.level === 'L1') {
+    alasanKesalahan = `Siswa memilih opsi **\`${item.studentAns}\`** (Kunci: **\`${item.correctAns}\`**). Sepertinya siswa belum hafal atau tertukar antara nama istilah pada materi **${item.materi}**.`;
+  } else if (item.level === 'L2') {
+    alasanKesalahan = `Siswa memilih opsi **\`${item.studentAns}\`** (Kunci: **\`${item.correctAns}\`**). Siswa sudah mengenal konsepnya tetapi kurang teliti saat menerapkannya pada indikator *"${item.indikator}"*.`;
+  } else {
+    alasanKesalahan = `Siswa memilih opsi **\`${item.studentAns}\`** (Kunci: **\`${item.correctAns}\`**). Siswa terburu-buru sehingga terkecoh oleh kalimat soal penalaran pada materi **${item.materi}**.`;
+  }
+
+  return `* **Soal No. ${item.num}** (Level Kognitif: \`${item.level}\`)
   - **Materi**: ${item.materi} ${item.kd ? `(${item.kd})` : ''}
   - **Indikator**: *"${item.indikator}"*
-  - **Catatan**: Siswa memilih jawaban **\`${item.studentAns}\`**, padahal kunci jawaban yang benar adalah **\`${item.correctAns}\`**. Sepertinya siswa tertukar atau kurang teliti pada bagian ini.
-`).join('\n') : `Hebat! Siswa menjawab seluruh soal dengan benar (Akurasi 100%).`}
+  - **Analisis Kesilapan**: ${alasanKesalahan}`;
+}).join('\n') : `Hebat! Siswa menjawab seluruh soal dengan benar (Akurasi 100%).`}
 
 ### 3. Rekomendasi Penguatan Konsep Berdasarkan Indikator Materi
-${wrongItems.length > 0 ? `Agar siswa lebih paham, penjelasan materi dapat difokuskan pada:\n` + wrongItems.map(item => `
-* **Penguatan Materi Soal No. ${item.num} (${item.materi})**:
-  - Ajak siswa mengulang kembali membaca materi mengenai *"${item.indikator}"*. Berikan contoh benda nyatanya atau ingatkan kembali kata kunci pada materi tersebut agar tidak terkecoh.
-`).join('\n') : `Pertahankan prestasi belajar siswa dengan memberikan bacaan atau latihan soal yang lebih menantang.`}
+${wrongItems.length > 0 ? `Berikut penguatan konsep spesifik yang perlu ditekankan ulang kepada **${studentName}**:\n` + wrongItems.map(item => {
+  let penjelasaKonsep = "";
+  if (item.level === 'L1') {
+    penjelasaKonsep = `Fokuskan pada pengenalan istilah dasar dan kata kunci penting mengenai *"${item.indikator}"* agar siswa tidak tertukar lagi.`;
+  } else if (item.level === 'L2') {
+    penjelasaKonsep = `Berikan contoh penerapan nyata terkait materi **${item.materi}** agar siswa paham cara menghubungkan teori dengan pertanyaan soal.`;
+  } else {
+    penjelasaKonsep = `Ajak siswa mendiskusikan hubungan sebab-akibat pada indikator *"${item.indikator}"* agar nalar berpikirnya semakin terasah.`;
+  }
+
+  return `* **Materi Soal No. ${item.num} (${item.materi})**:
+  - ${penjelasaKonsep}`;
+}).join('\n') : `Pertahankan prestasi belajar siswa dengan memberikan bacaan atau latihan soal yang lebih menantang.`}
 
 ### 4. Rekomendasi Cara Mengajar Guru di Kelas
 ${wrongItems.length > 0 ? `Berikut adalah saran tindakan khusus yang dapat dilakukan guru di kelas untuk mendampingi **${studentName}** pada setiap soal yang keliru:\n` + wrongItems.map(item => {
@@ -194,10 +214,21 @@ ${wrongItems.length > 0 ? `Berikut adalah saran tindakan khusus yang dapat dilak
 }).join('\n') : `* Guru dapat mengarahkan siswa **${studentName}** untuk membantu teman sekelasnya yang lain.`}
 
 ### 5. Panduan Latihan Siswa di Rumah
-${wrongItems.length > 0 ? `Saran kegiatan yang bisa dikerjakan siswa **${studentName}** di rumah bersama orang tua:\n` + wrongItems.map(item => `
-1. Menyalin ringkasan singkat materi **${item.materi}** di buku tulis agar lebih melekat di ingatan.
-2. Mengerjakan ulang 2 sampai 3 soal latihan serupa untuk topik tersebut.
-`).join('') : `1. Membaca materi bab berikutnya sebagai persiapan belajar mandiri.`}
+${wrongItems.length > 0 ? `Saran kegiatan bervariasi yang bisa dikerjakan **${studentName}** di rumah bersama orang tua:\n` + wrongItems.map(item => {
+  const indLower = item.indikator.toLowerCase();
+  let kegiatanRumah = "";
+
+  if (indLower.includes('gambar') || indLower.includes('peta') || indLower.includes('tabel')) {
+    kegiatanRumah = `Mewarnai atau menandai bagian penting pada gambar/tabel materi **${item.materi}** di buku paket bersama orang tua.`;
+  } else if (indLower.includes('tokoh') || indLower.includes('sejarah') || indLower.includes('sosial')) {
+    kegiatanRumah = `Menceritakan kembali kisah atau peran utama materi **${item.materi}** secara santai kepada orang tua sebelum tidur.`;
+  } else {
+    kegiatanRumah = `Membaca ulang catatan ringkas materi **${item.materi}** selama 10 menit, lalu mencoba menjawab 2 soal latihan sederhana.`;
+  }
+
+  return `* **Soal No. ${item.num} (${item.materi})**:
+  - ${kegiatanRumah}`;
+}).join('\n') : `1. Membaca materi bab berikutnya sebagai persiapan belajar mandiri.`}
 
 ### 6. Rencana Tindak Lanjut: ${isTuntas ? 'PENGAYAAN' : 'REMEDIAL'}
 ${isTuntas ? `
