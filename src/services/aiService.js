@@ -10,8 +10,6 @@ export function buildDiagnosticPrompt(exam, studentName, omrResult, questionMate
   const { score, correctCount, wrongCount, detectedAnswers } = omrResult;
 
   const wrongQuestions = [];
-  const correctQuestions = [];
-
   const effectiveTotal = Math.min(totalQuestions, detectedAnswers ? detectedAnswers.length : totalQuestions);
 
   if (detectedAnswers) {
@@ -22,22 +20,20 @@ export function buildDiagnosticPrompt(exam, studentName, omrResult, questionMate
       const kd = (questionKDs && questionKDs[i]) ? questionKDs[i] : '';
       const lvl = (questionLevels && questionLevels[i]) ? questionLevels[i] : 'L1';
 
-      if (a.isCorrect) {
-        correctQuestions.push(`Soal ${a.questionNumber} (Materi/TP: ${mat})`);
-      } else {
+      if (!a.isCorrect) {
         wrongQuestions.push(
-          `* [SOAL NO. ${a.questionNumber}] (Pilihan Siswa: '${a.studentAnswer}', Kunci: '${a.correctAnswer}')` +
-          `\n    - TP / Kompetensi Dasar: ${kd || '-'}` +
+          `* [SOAL NO. ${a.questionNumber}] (Pilihan Siswa: '${a.studentAnswer}', Kunci Jawaban Benar: '${a.correctAnswer}')` +
+          `\n    - Tujuan Pembelajaran / KD: ${kd || '-'}` +
           `\n    - Materi Pokok: ${mat}` +
           `\n    - Level Kognitif: ${lvl}` +
-          `\n    - Indikator Soal: "${ind}"`
+          `\n    - Deskripsi Indikator Soal: "${ind}"`
         );
       }
     }
   }
 
   return `
-Anda adalah seorang guru kelas sekolah dasar yang komunikatif, ramah, dan berpengalaman. Tugas Anda adalah menyusun Laporan Evaluasi Belajar Siswa yang bahasanya SANGAT SEDERHANA, PRAKTIS, MUDAH DIPAHAMI GURU SD & ORANG TUA, SERTA BEBAS DARI ISTILAH ASING/TEORI KAMPUS berdasarkan data berikut:
+Anda adalah seorang guru kelas SD yang komunikatif, ramah, dan berpengalaman. Tugas Anda adalah menyusun Laporan Evaluasi Belajar Siswa yang bahasanya SANGAT SEDERHANA, PRAKTIS, MUDAH DIPAHAMI GURU SD & ORANG TUA, SERTA BEBAS DARI ISTILAH ASING/TEORI KAMPUS berdasarkan data berikut:
 
 === DATA PENILAIAN SISWA ===
 - Nama Siswa: ${studentName}
@@ -56,7 +52,10 @@ ${wrongQuestions.length > 0 ? wrongQuestions.join('\n\n') : 'Siswa menjawab selu
    - Gunakan "Membuat catatan rangkuman ringkas atau bagan sederhana" (bukan concept mapping).
    - Gunakan "Menggunakan gambar, foto, atau benda nyata di kelas" (bukan demonstrasi visual 3D).
    - Gunakan "Latihan ulangan singkat 3 sampai 5 soal" (bukan re-test/asesmen klinis).
-3. Seluruh rekomendasi harus mengalir langsung dari materi dan indikator soal yang salah pada siswa tersebut.
+3. ATURAN KHUSUS UNTUK POIN 4 (Rekomendasi Cara Mengajar Guru di Kelas):
+   - WAJIB urutkan per butir soal yang salah (misal: "* **Materi Soal No. X (Nama Materi)**: ...").
+   - Setiap butir soal WAJIB memiliki saran aksi mengajar yang UNIK dan BERBEDA yang diambil langsung dari deskripsi "Indikator Soal" di atas.
+   - DILARANG KERAS mengulang kalimat saran yang sama antar-soal!
 
 === INSTRUKSI KHUSUS PENYUSUNAN LAPORAN (6 STRUKTUR BAKU) ===
 Tulis laporan dalam format Markdown dengan 6 heading berikut:
@@ -72,7 +71,7 @@ Jelaskan letak kesilapan siswa, bagian materi mana yang membuat siswa tertukar, 
 Uraikan penjelasan sederhana untuk setiap materi yang belum dikuasai siswa di atas. Berikan contoh mudah atau perumpamaan sehari-hari agar anak paham letak kekeliruannya.
 
 ### 4. Rekomendasi Cara Mengajar Guru di Kelas
-Berikan saran tindakan nyata yang bisa dilakukan guru di kelas untuk membimbing siswa pada materi yang salah tersebut (misalnya: mengajak tanya-jawab bergambar, memperlihatkan benda di sekitar kelas, atau membimbing latihan langkah demi langkah).
+Rincikan per butir soal yang salah (Soal No. X). Berikan 1 cara mengajar yang konkret dan spesifik berdasarkan teks Indikator Soal tersebut (misal: jika indikatornya tentang gambar -> sarankan memakai foto/gambar; jika tentang tabel -> sarankan berlatih membaca kolom tabel; jika tentang menyebutkan -> sarankan tanya-jawab kata kunci).
 
 ### 5. Panduan Latihan Siswa di Rumah
 Berikan 2 sampai 3 saran latihan ringan yang bisa dikerjakan anak di rumah bersama orang tua, seperti membaca kembali catatan atau mencoba 2-3 soal latihan serupa.
@@ -103,7 +102,7 @@ export async function callGroqAi(prompt, apiKey) {
       messages: [
         {
           role: "system",
-          content: "Anda adalah guru kelas SD yang ramah, bijak, dan berpengalaman. Anda selalu menulis laporan belajar siswa menggunakan Bahasa Indonesia yang sangat sederhana, membumi, praktis, dan tanpa istilah asing atau bahasa teori yang rumit."
+          content: "Anda adalah guru kelas SD yang ramah, bijak, dan berpengalaman. Anda selalu menulis laporan belajar siswa menggunakan Bahasa Indonesia yang sangat sederhana, membumi, praktis, dan tanpa istilah asing atau bahasa teori yang rumit. Pada Poin 4, Anda selalu memberikan saran mengajar yang unik per butir soal."
         },
         {
           role: "user",
@@ -158,15 +157,15 @@ export function generateLocalDiagnosticFallback(studentName, exam, omrResult, qu
 
   return `
 ### 1. Kesimpulan Tingkat Penguasaan Kompetensi
-Halo! Berdasarkan hasil tugas **${subject}**, siswa **${studentName}** mendapatkan nilai **${score}** dari KKM **${kkm}**. siswa menjawab benar **${correctCount}** soal dan keliru **${wrongCount}** soal dari total **${effectiveTotal}** butir soal. Status capaian belajar siswa dinyatakan **${isTuntas ? 'TELAH TUNTAS DAN BERHASIL' : 'BELUM TUNTAS DAN PERLU PENDAMPINGAN KHUSUS'}**.
+Halo! Berdasarkan hasil tugas **${subject}**, siswa **${studentName}** mendapatkan nilai **${score}** dari KKM **${kkm}**. Siswa menjawab benar **${correctCount}** soal dan keliru **${wrongCount}** soal dari total **${effectiveTotal}** butir soal. Status capaian belajar siswa dinyatakan **${isTuntas ? 'TELAH TUNTAS DAN BERHASIL' : 'BELUM TUNTAS DAN PERLU PENDAMPINGAN KHUSUS'}**.
 
 ### 2. Analisis Kesalahan Berdasarkan Indikator & Butir Soal
 ${wrongItems.length > 0 ? `Berdasarkan pemindaian jawaban, siswa **${studentName}** masih keliru pada bagian materi berikut:\n` + wrongItems.map(item => `
 * **Soal No. ${item.num}** (Level Kognitif: \`${item.level}\`)
   - **Materi**: ${item.materi} ${item.kd ? `(${item.kd})` : ''}
   - **Indikator**: *"${item.indikator}"*
-  - **Catatan**: siswa memilih jawaban **\`${item.studentAns}\`**, padahal kunci jawaban yang benar adalah **\`${item.correctAns}\`**. Sepertinya siswa tertukar atau kurang teliti pada bagian ini.
-`).join('\n') : `Hebat! siswa menjawab seluruh soal dengan benar (Akurasi 100%).`}
+  - **Catatan**: Siswa memilih jawaban **\`${item.studentAns}\`**, padahal kunci jawaban yang benar adalah **\`${item.correctAns}\`**. Sepertinya siswa tertukar atau kurang teliti pada bagian ini.
+`).join('\n') : `Hebat! Siswa menjawab seluruh soal dengan benar (Akurasi 100%).`}
 
 ### 3. Rekomendasi Penguatan Konsep Berdasarkan Indikator Materi
 ${wrongItems.length > 0 ? `Agar siswa lebih paham, penjelasan materi dapat difokuskan pada:\n` + wrongItems.map(item => `
@@ -174,28 +173,33 @@ ${wrongItems.length > 0 ? `Agar siswa lebih paham, penjelasan materi dapat difok
   - Ajak siswa mengulang kembali membaca materi mengenai *"${item.indikator}"*. Berikan contoh benda nyatanya atau ingatkan kembali kata kunci pada materi tersebut agar tidak terkecoh.
 `).join('\n') : `Pertahankan prestasi belajar siswa dengan memberikan bacaan atau latihan soal yang lebih menantang.`}
 
-### 4. Rekomendasi Cara Pembelajaran Khusus Guru di Kelas
-${wrongItems.length > 0 ? `Guru melakukan pendampingan belajar ke siswa **${studentName}** karena siswa tersebut kurang pada mata pelajaran **${subject}**, khususnya pada beberapa bagian berikut:\n` + wrongItems.map(item => {
-  let metodeSaran = `Guru membimbing siswa **${studentName}** untuk mengulang kembali materi **${item.materi}** menggunakan contoh benda nyata atau gambar di kelas.`;
-  if (item.materi.toLowerCase().includes('rotasi') || item.materi.toLowerCase().includes('gerhana') || item.materi.toLowerCase().includes('planet') || item.materi.toLowerCase().includes('tata surya') || item.materi.toLowerCase().includes('geografis') || item.materi.toLowerCase().includes('peta')) {
-    metodeSaran = `Guru membimbing siswa **${studentName}** untuk memahami materi **${item.materi}** dengan menunjukkan contoh langsung atau alat peraga sederhana agar anak lebih mudah menangkap konsepnya.`;
-  } else if (item.materi.toLowerCase().includes('energi') || item.materi.toLowerCase().includes('lingkungan') || item.materi.toLowerCase().includes('ekonomi') || item.materi.toLowerCase().includes('penebangan')) {
-    metodeSaran = `Guru membimbing siswa **${studentName}** menggunakan contoh cerita sehari-hari atau gambar lingkungan terkait materi **${item.materi}**.`;
-  } else if (item.materi.toLowerCase().includes('sejarah') || item.materi.toLowerCase().includes('tokoh') || item.materi.toLowerCase().includes('asean') || item.materi.toLowerCase().includes('proklamasi')) {
-    metodeSaran = `Guru membimbing siswa **${studentName}** menggunakan kartu bergambar atau catatan kecil berwarna untuk materi **${item.materi}**.`;
+### 4. Rekomendasi Cara Mengajar Guru di Kelas
+${wrongItems.length > 0 ? `Berikut adalah saran tindakan khusus yang dapat dilakukan guru di kelas untuk mendampingi **${studentName}** pada setiap soal yang keliru:\n` + wrongItems.map(item => {
+  const indLower = item.indikator.toLowerCase();
+  let metodeSaran = "";
+
+  if (indLower.includes('tabel')) {
+    metodeSaran = `Guru mengajak **${studentName}** melatih cara membaca baris dan kolom tabel pada materi **${item.materi}** dengan menandai kata kunci penting menggunakan pensil warna.`;
+  } else if (indLower.includes('gambar') || indLower.includes('peta') || indLower.includes('foto') || indLower.includes('ilustrasi')) {
+    metodeSaran = `Guru menunjukkan gambar atau foto nyata terkait materi **${item.materi}** di depan kelas, lalu mengajak **${studentName}** menunjuk bagian-bagian utamanya.`;
+  } else if (indLower.includes('menentukan') || indLower.includes('menyebutkan') || indLower.includes('mengidentifikasi')) {
+    metodeSaran = `Guru melakukan tanya-jawab singkat mengenai kata kunci materi **${item.materi}** dan membimbing siswa menyusun catatan ringkas sederhana.`;
+  } else if (indLower.includes('menganalisis') || indLower.includes('membandingkan') || indLower.includes('dampak')) {
+    metodeSaran = `Guru mengajak **${studentName}** berdiskusi menggunakan contoh cerita sederhana di sekitar kita tentang sebab-akibat pada materi **${item.materi}**.`;
   } else {
-    metodeSaran = `Guru membimbing siswa **${studentName}** mengerjakan ulang latihan secara bertahap pada materi **${item.materi}**.`;
+    metodeSaran = `Guru membimbing **${studentName}** mengerjakan latihan soal bertahap dari yang paling mudah pada materi **${item.materi}** sampai siswa percaya diri.`;
   }
+
   return `* **Materi Soal No. ${item.num} (${item.materi})**:\n  - ${metodeSaran}`;
 }).join('\n') : `* Guru dapat mengarahkan siswa **${studentName}** untuk membantu teman sekelasnya yang lain.`}
 
-### 5. Panduan Latihan & Belajar Mandiri Siswa di Rumah
+### 5. Panduan Latihan Siswa di Rumah
 ${wrongItems.length > 0 ? `Saran kegiatan yang bisa dikerjakan siswa **${studentName}** di rumah bersama orang tua:\n` + wrongItems.map(item => `
 1. Menyalin ringkasan singkat materi **${item.materi}** di buku tulis agar lebih melekat di ingatan.
 2. Mengerjakan ulang 2 sampai 3 soal latihan serupa untuk topik tersebut.
 `).join('') : `1. Membaca materi bab berikutnya sebagai persiapan belajar mandiri.`}
 
-### 6. Program Tindak Lanjut: ${isTuntas ? 'PENGAYAAN' : 'REMEDIAL TERFOKUS'}
+### 6. Rencana Tindak Lanjut: ${isTuntas ? 'PENGAYAAN' : 'REMEDIAL'}
 ${isTuntas ? `
 * **Program Pengayaan**: Berikan soal cerita tambahan atau tantangan seru agar kemampuannya semakin tuntas pada mata pelajaran **${subject}**.
 ` : `
@@ -203,5 +207,3 @@ ${isTuntas ? `
 `}
 `.trim();
 }
-
-//metode pembelajaran  berbasis gambar 
