@@ -42,7 +42,7 @@ Anda adalah seorang guru kelas SD yang komunikatif, ramah, dan berpengalaman. Tu
 - Capaian: ${correctCount} Benar, ${wrongCount} Salah (dari total ${effectiveTotal} butir soal pilihan ganda)
 
 === RINCIAN BUTIR SOAL YANG SALAH BESERTA INDIKATORNYA ===
-${wrongQuestions.length > 0 ? wrongQuestions.join('\n\n') : 'Siswa menjawab seluruh soal megenai tugas ini dengan benar (100% Sempurna).'}
+${wrongQuestions.length > 0 ? wrongQuestions.join('\n\n') : 'Siswa menjawab seluruh soal dengan benar (100% Sempurna).'}
 
 === ATURAN BAHASA WAJIB (PENTING!) ===
 1. DILARANG KERAS menggunakan istilah bahasa Inggris atau istilah kampus yang rumit (DILARANG menggunakan kata: scaffolding, problem-based learning, inkuiri terbimbing, concept mapping, peer tutor, re-test, distractor, kognitif, HOTS, biogeografi, komparasi, dll).
@@ -52,13 +52,10 @@ ${wrongQuestions.length > 0 ? wrongQuestions.join('\n\n') : 'Siswa menjawab selu
    - Gunakan "Membuat catatan rangkuman ringkas atau bagan sederhana" (bukan concept mapping).
    - Gunakan "Menggunakan gambar, foto, atau benda nyata di kelas" (bukan demonstrasi visual 3D).
    - Gunakan "Latihan ulangan singkat 3 sampai 5 soal" (bukan re-test/asesmen klinis).
-3. ATURAN KHUSUS UNTUK POIN 2, 3, 4, DAN 5 (DILARANG MENGULANG KALIMAT SAMA):
-   - WAJIB urutkan per butir soal yang salah (misal: "* **Soal No. X (Nama Materi)**: ...").
-   - Setiap butir soal WAJIB memiliki ulasan yang UNIK dan BERBEDA berdasarkan teks Indikator Soal & Level Kognitif (L1/L2/L3) dari soal tersebut.
-   - Poin 2: Jelaskan analisis kesilapan siswa secara spesifik per nomor soal (apakah tertukar istilah, keliru membaca tabel/gambar, atau terburu-buru).
-   - Poin 3: Berikan saran penguatan konsep yang spesifik per nomor soal berdasarkan indikatornya.
-   - Poin 4: Berikan 1 cara mengajar guru yang konkret dan spesifik per nomor soal.
-   - Poin 5: Berikan 1-2 kegiatan belajar di rumah yang bervariasi bersama orang tua sesuai topik materi soal tersebut.
+3. ATURAN KHUSUS UNTUK POIN 5 (Panduan Latihan Siswa di Rumah):
+   - WAJIB berikan 1 kegiatan rumah yang BERVARIASI DAN BERBEDA untuk SETIAP nomor soal yang salah (Soal No. X).
+   - Variasikan kegiatan rumahnya: ada yang menggunakan kartu tebak-tebakan kata kunci, ada yang mewarnai/menandai gambar di buku, ada yang menceritakan kembali secara lisan kepada orang tua, dan ada yang mendiskusikan contoh kejadian di rumah.
+   - DILARANG KERAS mengulang kalimat saran kegiatan rumah yang sama antar-soal!
 
 === INSTRUKSI KHUSUS PENYUSUNAN LAPORAN (6 STRUKTUR BAKU) ===
 Tulis laporan dalam format Markdown dengan 6 heading berikut:
@@ -73,10 +70,10 @@ Rincikan per nomor soal yang salah (Soal No. X). Jelaskan letak kesilapan siswa 
 Rincikan per nomor soal yang salah (Soal No. X). Berikan penjelasan konsep kunci yang harus ditekankan ulang agar siswa paham.
 
 ### 4. Rekomendasi Cara Mengajar Guru di Kelas
-Rincikan per nomor soal yang salah (Soal No. X). Berikan 1 cara mengajar yang konkret dan spesifik berdasarkan teks Indikator Soal tersebut (misal: jika tentang gambar -> gunakan foto; jika tentang tabel -> latih membaca kolom; jika tentang istilah -> ajak tanya-jawab).
+Rincikan per nomor soal yang salah (Soal No. X). Berikan 1 cara mengajar yang konkret dan spesifik berdasarkan teks Indikator Soal tersebut.
 
 ### 5. Panduan Latihan Siswa di Rumah
-Rincikan per nomor soal yang salah (Soal No. X). Berikan saran kegiatan belajar ringan di rumah bersama orang tua yang bervariasi sesuai topik materi.
+Rincikan per nomor soal yang salah (Soal No. X). Berikan 1 bentuk kegiatan belajar rumah yang UNIK dan BERVARIASI bersama orang tua (kartu tebak-tebakan, rangkuman gambar, cerita lisan, atau pengamatan di rumah).
 
 ### 6. Rencana Tindak Lanjut: ${score >= kkm ? 'PENGAYAAN' : 'REMEDIAL'}
 ${score >= kkm 
@@ -104,7 +101,7 @@ export async function callGroqAi(prompt, apiKey) {
       messages: [
         {
           role: "system",
-          content: "Anda adalah guru kelas SD yang ramah, bijak, dan berpengalaman. Anda selalu menulis laporan belajar siswa menggunakan Bahasa Indonesia yang sangat sederhana, membumi, praktis, dan tanpa istilah asing. Pada Poin 2, 3, 4, dan 5, Anda selalu memberikan ulasan yang unik dan bervariasi untuk setiap butir soal."
+          content: "Anda adalah guru kelas SD yang ramah, bijak, dan berpengalaman. Anda selalu menulis laporan belajar siswa menggunakan Bahasa Indonesia yang sangat sederhana, membumi, praktis, dan tanpa istilah asing. Pada Poin 5, Anda selalu memberikan rekomendasi kegiatan rumah yang bervariasi dan tidak pernah mengulang kalimat yang sama."
         },
         {
           role: "user",
@@ -156,6 +153,18 @@ export function generateLocalDiagnosticFallback(studentName, exam, omrResult, qu
       }
     }
   }
+
+  // Larik Kegiatan Rumah Bervariasi (8 Pilihan Kegiatan Unik)
+  const homeActivitiesTemplates = [
+    (materi) => `Orang tua membuat 3 kartu pertanyaan sederhana mengenai kata kunci **${materi}** dan mengajak **${studentName}** bermain tebak-tebakan selama 10 menit.`,
+    (materi) => `Orang tua mendampingi **${studentName}** mewarnai atau menandai bagian penting terkait materi **${materi}** di buku paket sekolah.`,
+    (materi) => `**${studentName}** diajak menceritakan kembali pemahamannya mengenai **${materi}** secara santai kepada orang tua sebelum tidur.`,
+    (materi) => `Mendiskusikan contoh kejadian sehari-hari di sekitar rumah yang berhubungan langsung dengan materi **${materi}**.`,
+    (materi) => `**${studentName}** menuliskan 3 poin utama materi **${materi}** di kertas memo berwarna untuk ditempel di dekat meja belajar.`,
+    (materi) => `Membimbing **${studentName}** menggambar diagram atau bagan sederhana tentang **${materi}** di buku latihan.`,
+    (materi) => `Orang tua membimbing **${studentName}** membaca ulang 1 halaman materi **${materi}** lalu mencoba menjawab 2 soal latihan serupa.`,
+    (materi) => `Mengamati benda atau peristiwa nyata di sekitar rumah yang memperlihatkan contoh materi **${materi}**.`
+  ];
 
   return `
 ### 1. Kesimpulan Tingkat Penguasaan Kompetensi
@@ -214,20 +223,9 @@ ${wrongItems.length > 0 ? `Berikut adalah saran tindakan khusus yang dapat dilak
 }).join('\n') : `* Guru dapat mengarahkan siswa **${studentName}** untuk membantu teman sekelasnya yang lain.`}
 
 ### 5. Panduan Latihan Siswa di Rumah
-${wrongItems.length > 0 ? `Saran kegiatan bervariasi yang bisa dikerjakan **${studentName}** di rumah bersama orang tua:\n` + wrongItems.map(item => {
-  const indLower = item.indikator.toLowerCase();
-  let kegiatanRumah = "";
-
-  if (indLower.includes('gambar') || indLower.includes('peta') || indLower.includes('tabel')) {
-    kegiatanRumah = `Mewarnai atau menandai bagian penting pada gambar/tabel materi **${item.materi}** di buku paket bersama orang tua.`;
-  } else if (indLower.includes('tokoh') || indLower.includes('sejarah') || indLower.includes('sosial')) {
-    kegiatanRumah = `Menceritakan kembali kisah atau peran utama materi **${item.materi}** secara santai kepada orang tua sebelum tidur.`;
-  } else {
-    kegiatanRumah = `Membaca ulang catatan ringkas materi **${item.materi}** selama 10 menit, lalu mencoba menjawab 2 soal latihan sederhana.`;
-  }
-
-  return `* **Soal No. ${item.num} (${item.materi})**:
-  - ${kegiatanRumah}`;
+${wrongItems.length > 0 ? `Saran kegiatan bervariasi yang bisa dikerjakan **${studentName}** di rumah bersama orang tua:\n` + wrongItems.map((item, idx) => {
+  const actFn = homeActivitiesTemplates[idx % homeActivitiesTemplates.length];
+  return `* **Soal No. ${item.num} (${item.materi})**:\n  - ${actFn(item.materi)}`;
 }).join('\n') : `1. Membaca materi bab berikutnya sebagai persiapan belajar mandiri.`}
 
 ### 6. Rencana Tindak Lanjut: ${isTuntas ? 'PENGAYAAN' : 'REMEDIAL'}
